@@ -1,0 +1,168 @@
+.tiptap {
+    @apply relative;
+
+    :first-child {
+        @apply mt-0;
+    }
+
+    /* List Styles */
+    ul,
+    ol {
+        @apply list-outside px-4 my-5 ml-1.5;
+    }
+
+    ul {
+        @apply list-disc;
+    }
+
+    ol {
+        @apply list-decimal;
+    }
+
+    /* Nested Lists - maintain proper indentation */
+    ul ul,
+    ul ol,
+    ol ul,
+    ol ol {
+        @apply ml-6;
+    }
+
+    li p {
+        @apply my-1;
+    }
+
+    ul,
+    ol {
+        padding: 0 1rem;
+        margin: 1.25rem 1rem 1.25rem 0.4rem;
+
+        li p {
+            margin-top: 0.25em;
+            margin-bottom: 0.25em;
+        }
+    }
+
+    ul[data-type="taskList"] {
+        list-style: none;
+        margin-left: 0;
+        padding: 0;
+    }
+
+    ul[data-type="taskList"] li {
+        @apply flex items-start;
+    }
+
+    ul[data-type="taskList"] li>label {
+        @apply mr-2 cursor-pointer select-none;
+    }
+
+    ul[data-type="taskList"] li>div {
+        @apply flex-1;
+    }
+
+    input[type="checkbox"] {
+        @apply cursor-pointer;
+    }
+
+    /* Heading styles */
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        @apply leading-tight mt-10 first:mt-0 font-bold;
+    }
+
+    h1,
+    h2 {
+        @apply mt-14 mb-6;
+    }
+
+    h1 {
+        @apply text-2xl;
+    }
+
+    h2 {
+        @apply text-xl;
+    }
+
+    h3 {
+        @apply text-lg;
+    }
+
+    h4,
+    h5,
+    h6 {
+        @apply text-base;
+    }
+
+    p {
+        word-break: break-all;
+    }
+
+    blockquote {
+        border-left: 3px solid var(--gray-3);
+        margin: 1.5rem 0;
+        padding-left: 1rem;
+    }
+
+    hr {
+        border: none;
+        border-top: 1px solid var(--gray-2);
+        margin: 2rem 0;
+    }
+
+    mark {
+        background-color: #faf594;
+        border-radius: 0.4rem;
+        box-decoration-break: clone;
+        padding: 0.1rem 0.3rem;
+    }
+
+    /* Give a remote user a caret */
+    .collaboration-cursor__caret {
+        border-left: 1.25px solid #0d0d0d;
+        border-right: 1.25px solid #0d0d0d;
+        margin-left: -1px;
+        margin-right: -1px;
+        pointer-events: none;
+        position: relative;
+        word-break: normal;
+    }
+
+    /* Render the username above the caret */
+    .collaboration-cursor__label {
+        border-radius: 3px 3px 3px 0;
+        color: #0d0d0d;
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 600;
+        left: -1px;
+        line-height: normal;
+        padding: 0.1rem 0.3rem;
+        position: absolute;
+        top: -1.4em;
+        user-select: none;
+        white-space: nowrap;
+    }
+}
+
+.col-group {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+
+    @media (max-width: 540px) {
+        flex-direction: column;
+    }
+}
+
+/* Column-half */
+body {
+    overflow: hidden;
+}
+
+.ProseMirror {
+    padding: 1rem;
+}
