@@ -159,8 +159,6 @@ export const fetchAmapPlaceByKeywords = async (
       }
     );
 
-    console.log("text search", response)
-
     if (response.data.status === "1" && response.data.pois) {
       if (typeof response.data.pois === "string") {
         throw new Error("Failed to fetch place text from Amap API");

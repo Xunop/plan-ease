@@ -17,7 +17,7 @@ function Mention(props: NodeViewProps) {
   const { places, AddPlace, RemovePlace, AddLocation, RemoveLocation } = useBoundStore((state) => state);
   useEffect(() => {
     const placeId = props.node.attrs.id;
-    console.log(`Mention ${props.node.attrs.label} added`);
+    // console.log(`Mention ${props.node.attrs.label} added`);
     // localforage.getItem(placeId).then((place) => {
     //   AddPlace(place as AmapPlace);
     // });
@@ -26,13 +26,13 @@ function Mention(props: NodeViewProps) {
     return () => {
       // RemovePlace(placeId);
       RemoveLocation(props.node.attrs.location)
-      console.log(`Mention ${props.node.attrs.label} deleted`);
+      // console.log(`Mention ${props.node.attrs.label} deleted`);
     };
   }, []);
 
-  useEffect(() => {
-    console.log("debug::places:", places);
-  }, [places]);
+  // useEffect(() => {
+  //   console.log("debug::places:", places);
+  // }, [places]);
 
   const handleClick = () => {
     console.log("click mention: ", props.node.attrs.label);

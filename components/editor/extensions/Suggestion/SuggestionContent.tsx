@@ -42,7 +42,6 @@ const SuggestionContent = forwardRef<
 
   useEffect(() => {
     const pos = props.decorationNode?.getBoundingClientRect();
-    // console.log("suggestion pos", pos);
     if (pos) {
       // Estimate the height of the PopoverContent
       const popoverHeight =
@@ -75,11 +74,9 @@ const SuggestionContent = forwardRef<
 
   useImperativeHandle(ref, () => ({
     handleShow: () => {
-      // console.log("show");
       setOpen(true);
     },
     handleHide: () => {
-      // console.log("hide");
       setOpen(false);
     },
     handleKeydown: ({ event }: { event: KeyboardEvent }) => {
@@ -148,7 +145,6 @@ const SuggestionContent = forwardRef<
 
   const selectItem = (index: number) => {
     const item = props.items[index];
-    console.log("DEBUG:: selected", item);
 
     let place: AmapPlace;
 

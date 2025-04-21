@@ -39,7 +39,7 @@ export const useCollaboration = ({
       // When enabled, initialize the provider and yDoc
       const yDoc = new YDoc(); // Initialize the YDoc instance
 
-      // new IndexeddbPersistence("y-document", yDoc);
+      new IndexeddbPersistence("y-document", yDoc);
       const providerInstance = getProvider({ docId, yDoc }); // Initialize the provider with the docId
 
       if (isMounted) {

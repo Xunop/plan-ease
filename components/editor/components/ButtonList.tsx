@@ -58,7 +58,6 @@ const ButtonList = ({ pos, outerDivRef, editor }: ButtonListProps) => {
     const { GetRoute, UpdateRoute, AddRoute } = useBoundStore((state) => state);
 
     const node = editor.state.doc.nodeAt(pos.nodePos);
-    // console.log("node", node);
     const handleMapclick = () => {
         const locations = [] as string[];
         let id = "";
@@ -81,7 +80,6 @@ const ButtonList = ({ pos, outerDivRef, editor }: ButtonListProps) => {
             console.log("update route", route);
             UpdateRoute(id, route);
         }
-        console.log("click", locations);
     };
 
     // useEffect(() => {

@@ -158,9 +158,6 @@ const MapComponent: React.FC = () => {
             if (locations.length > 2) {
               waypoints = locations.slice(1, len - 1).join(";");
             }
-            console.log(
-              `route origin: ${origin}, destination: ${destination}, waypoints: ${waypoints}`,
-            );
             fetchAmapDirection({ origin, destination, waypoints }).then(
               (route) => {
                 const polyline = getPolyline(route, origin, destination);
