@@ -10,1552 +10,191 @@ import { getPolyline } from "./utils";
 
 // Define static tile layers and icon outside the component
 const gaoDeNormal = L.tileLayer(
-    "//webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
-    // "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png",
-    {
-        subdomains: ["1", "2", "3", "4"],
-        attribution: 'Map data © <a href="https://www.amap.com/">GaoDe</a>',
-        // attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
-    },
+  "//webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}",
+  // "https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png",
+  {
+    subdomains: ["1", "2", "3", "4"],
+    attribution: 'Map data © <a href="https://www.amap.com/">GaoDe</a>',
+    // attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
+  },
 );
 
 // GaoDe Satellite Map provider
 const gaoDeSatellite = L.tileLayer(
-    "//webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
-    {
-        subdomains: ["1", "2", "3", "4"],
-        attribution:
-            'Satellite map data &copy; <a href="https://www.amap.com/">GaoDe</a>',
-    },
+  "//webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}",
+  {
+    subdomains: ["1", "2", "3", "4"],
+    attribution:
+      'Satellite map data &copy; <a href="https://www.amap.com/">GaoDe</a>',
+  },
 );
 
 // GaoDe Satellite Annotation Map
 const gaoDeSatelliteAnnotation = L.tileLayer(
-    "//webst0{s}.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}",
-    {
-        subdomains: ["1", "2", "3", "4"],
-        attribution:
-            'Satellite Annotation map data &copy; <a href="https://www.amap.com/">GaoDe</a>',
-    },
+  "//webst0{s}.is.autonavi.com/appmaptile?style=8&x={x}&y={y}&z={z}",
+  {
+    subdomains: ["1", "2", "3", "4"],
+    attribution:
+      'Satellite Annotation map data &copy; <a href="https://www.amap.com/">GaoDe</a>',
+  },
 );
 
 // Add base map control to switch between layers
 const baseMaps = {
-    Normal: gaoDeNormal,
-    Satellite: gaoDeSatellite,
-    "Satellite Annotation": gaoDeSatelliteAnnotation,
+  Normal: gaoDeNormal,
+  Satellite: gaoDeSatellite,
+  "Satellite Annotation": gaoDeSatelliteAnnotation,
 };
 
 const customIcon = L.icon({
-    // iconUrl: "/map-pin-fill.svg",
-    iconUrl: "/map-pin-a.svg",
-    iconSize: [38, 95],
-    iconAnchor: [12, 20],
-    popupAnchor: [1, -34],
+  // iconUrl: "/map-pin-fill.svg",
+  iconUrl: "/map-pin-a.svg",
+  iconSize: [38, 95],
+  iconAnchor: [12, 20],
+  popupAnchor: [1, -34],
 });
 
 const MapComponent: React.FC = () => {
-    const mapRef = useRef<HTMLDivElement>(null);
-    const mapInstanceRef = useRef<L.Map | null>(null);
-    const layerGroupRef = useRef<L.LayerGroup | null>(null);
-    const { locations, routes } = useBoundStore((state) => state);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const layerGroupRef = useRef<L.LayerGroup | null>(null);
+  const { locations, places, routes } = useBoundStore((state) => state);
 
-    // Initialize the map once on mount
-    useEffect(() => {
-        if (mapRef.current && !mapInstanceRef.current) {
-            const map = L.map(mapRef.current ? mapRef.current : "map", {
-                center: [31.59, 120.29],
-                zoom: 12,
-                zoomControl: true,
-                attributionControl: false,
-            });
-            mapInstanceRef.current = map;
-            gaoDeNormal.addTo(map);
-            // L.control.layers(baseMaps).addTo(map);
+  // Initialize the map once on mount
+  useEffect(() => {
+    if (mapRef.current && !mapInstanceRef.current) {
+      const map = L.map(mapRef.current ? mapRef.current : "map", {
+        center: [31.59, 120.29],
+        zoom: 12,
+        zoomControl: true,
+        attributionControl: false,
+      });
+      mapInstanceRef.current = map;
+      gaoDeNormal.addTo(map);
+      // L.control.layers(baseMaps).addTo(map);
 
-            const layerGroup = L.layerGroup().addTo(map);
-            layerGroupRef.current = layerGroup;
+      const layerGroup = L.layerGroup().addTo(map);
+      layerGroupRef.current = layerGroup;
 
-            const resizeObserver = new ResizeObserver(() => map.invalidateSize());
-            resizeObserver.observe(mapRef.current);
+      const resizeObserver = new ResizeObserver(() => map.invalidateSize());
+      resizeObserver.observe(mapRef.current);
 
-            return () => {
-                resizeObserver.disconnect();
-                map.remove();
-                mapInstanceRef.current = null;
-            };
-        }
-    }, []); // Empty dependency array ensures this runs only once
+      return () => {
+        resizeObserver.disconnect();
+        map.remove();
+        mapInstanceRef.current = null;
+      };
+    }
+  }, []); // Empty dependency array ensures this runs only once
 
-    // Update markers when locations change
-    useEffect(() => {
-        if (mapInstanceRef.current && layerGroupRef.current) {
-            const map = mapInstanceRef.current;
-            const layerGroup = layerGroupRef.current;
+  // Update markers when locations change
+  useEffect(() => {
+    if (mapInstanceRef.current && layerGroupRef.current) {
+      const map = mapInstanceRef.current;
+      const layerGroup = layerGroupRef.current;
 
-            layerGroup.clearLayers();
+      layerGroup.clearLayers();
 
-            const markers = locations
-                .filter((item) => item.location.length > 0)
-                .map((item) => {
-                    const [longitude, latitude] = item.location
-                        .split(",")
-                        .map(parseFloat);
-                    return L.marker([latitude, longitude], {
-                        icon: customIcon,
-                    });
-                });
+      const markers = locations
+        .filter((item) => item.location.length > 0)
+        .map((item) => {
+          const [longitude, latitude] = item.location
+            .split(",")
+            .map(parseFloat);
+          return L.marker([latitude, longitude], {
+            icon: customIcon,
+          });
+        });
 
-            markers.forEach((marker) => layerGroup.addLayer(marker));
+      markers.forEach((marker) => layerGroup.addLayer(marker));
 
-            if (markers.length > 0) {
-                const lastMarker = markers[markers.length - 1];
-                map.flyTo(lastMarker.getLatLng(), 12, {
-                    duration: 2,
-                    easeLinearity: 0.25,
-                });
+      if (markers.length > 0) {
+        const lastMarker = markers[markers.length - 1];
+        map.flyTo(lastMarker.getLatLng(), 12, {
+          duration: 2,
+          easeLinearity: 0.25,
+        });
+      }
+    }
+    // }, [places]);
+  }, [locations]);
+
+  const prevRoutesRef = useRef<Route[]>([]);
+
+  // Update polyline when routes update
+  useEffect(() => {
+    if (mapInstanceRef.current) {
+      const map = mapInstanceRef.current;
+
+      const prevRoutes = prevRoutesRef.current;
+      const currentRoutes = routes;
+
+      // Find added routes: in current but not in previous
+      const addedRoutes = currentRoutes.filter(
+        (route) => !prevRoutes.some((prev) => prev.id === route.id),
+      );
+
+      // Find removed routes: in previous but not in current
+      const removedRoutes = prevRoutes.filter(
+        (prev) => !currentRoutes.some((route) => route.id === prev.id),
+      );
+
+      // Find updated routes: in both, but properties differ
+      const updatedRoutes = currentRoutes.filter((route) => {
+        const prevRoute = prevRoutes.find((prev) => prev.id === route.id);
+        return prevRoute && !isEqual(prevRoute, route);
+      });
+
+      // Process the changes
+      addedRoutes.forEach((route) => {
+        console.log("Route added:", route);
+        const locations = route.locations;
+        const len = locations.length;
+        if (len > 0) {
+          if (len > 1) {
+            const origin = locations[0];
+            const destination = locations[len - 1];
+            let waypoints = "";
+            if (locations.length > 2) {
+              waypoints = locations.slice(1, len - 1).join(";");
             }
-        }
-    }, [locations]);
-
-    const prevRoutesRef = useRef<Route[]>([]);
-
-    // Update polyline when routes update
-    useEffect(() => {
-        if (mapInstanceRef.current) {
-            const map = mapInstanceRef.current;
-
-            const prevRoutes = prevRoutesRef.current;
-            const currentRoutes = routes;
-
-            // Find added routes: in current but not in previous
-            const addedRoutes = currentRoutes.filter(
-                (route) => !prevRoutes.some((prev) => prev.id === route.id),
+            console.log(
+              `route origin: ${origin}, destination: ${destination}, waypoints: ${waypoints}`,
             );
-
-            // Find removed routes: in previous but not in current
-            const removedRoutes = prevRoutes.filter(
-                (prev) => !currentRoutes.some((route) => route.id === prev.id),
+            fetchAmapDirection({ origin, destination, waypoints }).then(
+              (route) => {
+                const polyline = getPolyline(route, origin, destination);
+                // Add the origin and destination points to the polyline (ensure they are part of the route)
+                const line = L.polyline(polyline, {
+                  color: "#5C7CFA",
+                  smoothFactor: 1,
+                  weight: 4,
+                }).addTo(map);
+                map.fitBounds(line.getBounds());
+              },
             );
-
-            // Find updated routes: in both, but properties differ
-            const updatedRoutes = currentRoutes.filter((route) => {
-                const prevRoute = prevRoutes.find((prev) => prev.id === route.id);
-                return prevRoute && !isEqual(prevRoute, route);
-            });
-
-            // Process the changes
-            addedRoutes.forEach((route) => {
-                console.log("Route added:", route);
-                const locations = route.locations;
-                const len = locations.length;
-                if (len > 0) {
-                    if (len > 1) {
-                        const origin = locations[0];
-                        const destination = locations[len - 1];
-                        const waypoints = locations.slice(1, len).join(";");
-                        fetchAmapDirection({ origin, destination, waypoints }).then(
-                            (route) => {
-                                const polyline = getPolyline(route, origin, destination);
-//                                 const polyline = [
-//     [
-//         [
-//             31.96875,
-//             118.798039
-//         ],
-//         [
-//             31.969549,
-//             118.799151
-//         ],
-//         [
-//             31.970182,
-//             118.798701
-//         ],
-//         [
-//             31.970182,
-//             118.798701
-//         ],
-//         [
-//             31.970214,
-//             118.798781
-//         ],
-//         [
-//             31.970268,
-//             118.79892
-//         ],
-//         [
-//             31.970354,
-//             118.799119
-//         ],
-//         [
-//             31.97044,
-//             118.799323
-//         ],
-//         [
-//             31.970541,
-//             118.799527
-//         ],
-//         [
-//             31.9706,
-//             118.799671
-//         ],
-//         [
-//             31.970627,
-//             118.799725
-//         ],
-//         [
-//             31.970627,
-//             118.799725
-//         ],
-//         [
-//             31.970692,
-//             118.799688
-//         ],
-//         [
-//             31.971244,
-//             118.799344
-//         ],
-//         [
-//             31.971303,
-//             118.799318
-//         ],
-//         [
-//             31.971319,
-//             118.799307
-//         ],
-//         [
-//             31.971496,
-//             118.799328
-//         ],
-//         [
-//             31.971496,
-//             118.799328
-//         ],
-//         [
-//             31.971673,
-//             118.799296
-//         ],
-//         [
-//             31.97177,
-//             118.799275
-//         ],
-//         [
-//             31.971995,
-//             118.79913
-//         ],
-//         [
-//             31.972194,
-//             118.798996
-//         ],
-//         [
-//             31.972194,
-//             118.798996
-//         ],
-//         [
-//             31.972398,
-//             118.79899
-//         ],
-//         [
-//             31.972789,
-//             118.798781
-//         ],
-//         [
-//             31.972934,
-//             118.798717
-//         ],
-//         [
-//             31.973224,
-//             118.798658
-//         ],
-//         [
-//             31.973358,
-//             118.798658
-//         ],
-//         [
-//             31.97361,
-//             118.798717
-//         ],
-//         [
-//             31.97376,
-//             118.798797
-//         ],
-//         [
-//             31.9739,
-//             118.798888
-//         ],
-//         [
-//             31.974001,
-//             118.79898
-//         ],
-//         [
-//             31.974264,
-//             118.799285
-//         ],
-//         [
-//             31.974484,
-//             118.799773
-//         ],
-//         [
-//             31.974527,
-//             118.799843
-//         ],
-//         [
-//             31.974624,
-//             118.79995
-//         ],
-//         [
-//             31.97501,
-//             118.800943
-//         ],
-//         [
-//             31.975182,
-//             118.801383
-//         ],
-//         [
-//             31.975182,
-//             118.801383
-//         ],
-//         [
-//             31.976136,
-//             118.803759
-//         ],
-//         [
-//             31.977102,
-//             118.806152
-//         ],
-//         [
-//             31.977118,
-//             118.806195
-//         ],
-//         [
-//             31.977247,
-//             118.80656
-//         ],
-//         [
-//             31.977424,
-//             118.806967
-//         ],
-//         [
-//             31.978073,
-//             118.808635
-//         ],
-//         [
-//             31.978561,
-//             118.809837
-//         ],
-//         [
-//             31.978706,
-//             118.810191
-//         ],
-//         [
-//             31.978969,
-//             118.810674
-//         ],
-//         [
-//             31.979076,
-//             118.810846
-//         ],
-//         [
-//             31.979183,
-//             118.810969
-//         ],
-//         [
-//             31.97928,
-//             118.8112
-//         ],
-//         [
-//             31.979554,
-//             118.811881
-//         ],
-//         [
-//             31.979994,
-//             118.812965
-//         ],
-//         [
-//             31.980514,
-//             118.814257
-//         ],
-//         [
-//             31.981201,
-//             118.815969
-//         ],
-//         [
-//             31.981206,
-//             118.815974
-//         ],
-//         [
-//             31.981372,
-//             118.816403
-//         ],
-//         [
-//             31.981646,
-//             118.817079
-//         ],
-//         [
-//             31.982638,
-//             118.819568
-//         ],
-//         [
-//             31.983362,
-//             118.821376
-//         ],
-//         [
-//             31.984258,
-//             118.823608
-//         ],
-//         [
-//             31.984639,
-//             118.824514
-//         ],
-//         [
-//             31.985154,
-//             118.825657
-//         ],
-//         [
-//             31.985605,
-//             118.826601
-//         ],
-//         [
-//             31.986098,
-//             118.827583
-//         ],
-//         [
-//             31.986383,
-//             118.828125
-//         ],
-//         [
-//             31.986538,
-//             118.82842
-//         ],
-//         [
-//             31.986962,
-//             118.829176
-//         ],
-//         [
-//             31.987332,
-//             118.829814
-//         ],
-//         [
-//             31.987756,
-//             118.830533
-//         ],
-//         [
-//             31.987922,
-//             118.830844
-//         ],
-//         [
-//             31.989161,
-//             118.832711
-//         ],
-//         [
-//             31.989762,
-//             118.833569
-//         ],
-//         [
-//             31.990266,
-//             118.834261
-//         ],
-//         [
-//             31.991468,
-//             118.835801
-//         ],
-//         [
-//             31.99216,
-//             118.836622
-//         ],
-//         [
-//             31.992187,
-//             118.836654
-//         ],
-//         [
-//             31.992857,
-//             118.837416
-//         ],
-//         [
-//             31.993453,
-//             118.838054
-//         ],
-//         [
-//             31.994005,
-//             118.838649
-//         ],
-//         [
-//             31.994225,
-//             118.838885
-//         ],
-//         [
-//             31.99444,
-//             118.839121
-//         ],
-//         [
-//             31.994815,
-//             118.839497
-//         ],
-//         [
-//             31.995186,
-//             118.839878
-//         ],
-//         [
-//             31.996505,
-//             118.841246
-//         ],
-//         [
-//             31.997857,
-//             118.842662
-//         ],
-//         [
-//             31.998517,
-//             118.843338
-//         ],
-//         [
-//             32.00011,
-//             118.845033
-//         ],
-//         [
-//             32.001226,
-//             118.84616
-//         ],
-//         [
-//             32.002664,
-//             118.84763
-//         ],
-//         [
-//             32.003173,
-//             118.84815
-//         ],
-//         [
-//             32.003275,
-//             118.848252
-//         ],
-//         [
-//             32.00408,
-//             118.849088
-//         ],
-//         [
-//             32.005056,
-//             118.850097
-//         ],
-//         [
-//             32.005105,
-//             118.850145
-//         ],
-//         [
-//             32.005298,
-//             118.850344
-//         ],
-//         [
-//             32.005915,
-//             118.850982
-//         ],
-//         [
-//             32.006252,
-//             118.851363
-//         ],
-//         [
-//             32.006317,
-//             118.851417
-//         ],
-//         [
-//             32.006665,
-//             118.851803
-//         ],
-//         [
-//             32.007207,
-//             118.85242
-//         ],
-//         [
-//             32.007894,
-//             118.853251
-//         ],
-//         [
-//             32.008902,
-//             118.85455
-//         ],
-//         [
-//             32.009675,
-//             118.855622
-//         ],
-//         [
-//             32.010662,
-//             118.857098
-//         ],
-//         [
-//             32.011257,
-//             118.858015
-//         ],
-//         [
-//             32.011477,
-//             118.858353
-//         ],
-//         [
-//             32.012722,
-//             118.860209
-//         ],
-//         [
-//             32.013741,
-//             118.861738
-//         ],
-//         [
-//             32.014122,
-//             118.862301
-//         ],
-//         [
-//             32.01416,
-//             118.862355
-//         ],
-//         [
-//             32.014846,
-//             118.863385
-//         ],
-//         [
-//             32.014846,
-//             118.863385
-//         ],
-//         [
-//             32.015962,
-//             118.864994
-//         ],
-//         [
-//             32.016316,
-//             118.865477
-//         ],
-//         [
-//             32.016788,
-//             118.866072
-//         ],
-//         [
-//             32.017319,
-//             118.8667
-//         ],
-//         [
-//             32.017732,
-//             118.86714
-//         ],
-//         [
-//             32.018231,
-//             118.867655
-//         ],
-//         [
-//             32.018569,
-//             118.867977
-//         ],
-//         [
-//             32.019213,
-//             118.868551
-//         ],
-//         [
-//             32.019814,
-//             118.869044
-//         ],
-//         [
-//             32.020618,
-//             118.869634
-//         ],
-//         [
-//             32.021257,
-//             118.870069
-//         ],
-//         [
-//             32.021707,
-//             118.870342
-//         ],
-//         [
-//             32.022995,
-//             118.871136
-//         ],
-//         [
-//             32.023327,
-//             118.87133
-//         ],
-//         [
-//             32.02344,
-//             118.871394
-//         ],
-//         [
-//             32.024556,
-//             118.87207
-//         ],
-//         [
-//             32.025146,
-//             118.872429
-//         ],
-//         [
-//             32.02521,
-//             118.872467
-//         ],
-//         [
-//             32.025961,
-//             118.872944
-//         ],
-//         [
-//             32.026696,
-//             118.873438
-//         ],
-//         [
-//             32.027163,
-//             118.873781
-//         ],
-//         [
-//             32.027372,
-//             118.873936
-//         ],
-//         [
-//             32.027935,
-//             118.874414
-//         ],
-//         [
-//             32.028633,
-//             118.875036
-//         ],
-//         [
-//             32.029405,
-//             118.875809
-//         ],
-//         [
-//             32.029834,
-//             118.876286
-//         ],
-//         [
-//             32.030585,
-//             118.877198
-//         ],
-//         [
-//             32.031073,
-//             118.877853
-//         ],
-//         [
-//             32.031508,
-//             118.87848
-//         ],
-//         [
-//             32.03205,
-//             118.879344
-//         ],
-//         [
-//             32.032447,
-//             118.880036
-//         ],
-//         [
-//             32.0325,
-//             118.880132
-//         ],
-//         [
-//             32.033482,
-//             118.88194
-//         ],
-//         [
-//             32.034963,
-//             118.884628
-//         ],
-//         [
-//             32.035006,
-//             118.884708
-//         ],
-//         [
-//             32.035279,
-//             118.885213
-//         ],
-//         [
-//             32.0361,
-//             118.88672
-//         ],
-//         [
-//             32.036132,
-//             118.886779
-//         ],
-//         [
-//             32.036492,
-//             118.887439
-//         ],
-//         [
-//             32.037275,
-//             118.888893
-//         ],
-//         [
-//             32.037677,
-//             118.889601
-//         ],
-//         [
-//             32.038165,
-//             118.890459
-//         ],
-//         [
-//             32.038627,
-//             118.891248
-//         ],
-//         [
-//             32.039152,
-//             118.892063
-//         ],
-//         [
-//             32.039893,
-//             118.893088
-//         ],
-//         [
-//             32.040215,
-//             118.893495
-//         ],
-//         [
-//             32.040542,
-//             118.893876
-//         ],
-//         [
-//             32.040681,
-//             118.894042
-//         ],
-//         [
-//             32.040762,
-//             118.894133
-//         ],
-//         [
-//             32.04154,
-//             118.894954
-//         ],
-//         [
-//             32.042017,
-//             118.895389
-//         ],
-//         [
-//             32.0425,
-//             118.895818
-//         ],
-//         [
-//             32.042908,
-//             118.896145
-//         ],
-//         [
-//             32.043583,
-//             118.89665
-//         ],
-//         [
-//             32.044029,
-//             118.896955
-//         ],
-//         [
-//             32.044415,
-//             118.897197
-//         ],
-//         [
-//             32.044769,
-//             118.897406
-//         ],
-//         [
-//             32.04537,
-//             118.897744
-//         ],
-//         [
-//             32.045456,
-//             118.897787
-//         ],
-//         [
-//             32.046056,
-//             118.898076
-//         ],
-//         [
-//             32.046974,
-//             118.898452
-//         ],
-//         [
-//             32.047118,
-//             118.898506
-//         ],
-//         [
-//             32.047424,
-//             118.898618
-//         ],
-//         [
-//             32.048036,
-//             118.898817
-//         ],
-//         [
-//             32.048771,
-//             118.89901
-//         ],
-//         [
-//             32.048937,
-//             118.899042
-//         ],
-//         [
-//             32.049838,
-//             118.899219
-//         ],
-//         [
-//             32.050305,
-//             118.899278
-//         ],
-//         [
-//             32.051211,
-//             118.899353
-//         ],
-//         [
-//             32.052279,
-//             118.899396
-//         ],
-//         [
-//             32.053288,
-//             118.899337
-//         ],
-//         [
-//             32.053744,
-//             118.899278
-//         ],
-//         [
-//             32.054484,
-//             118.899149
-//         ],
-//         [
-//             32.055337,
-//             118.898978
-//         ],
-//         [
-//             32.056083,
-//             118.898774
-//         ],
-//         [
-//             32.056436,
-//             118.89865
-//         ],
-//         [
-//             32.05759,
-//             118.8982
-//         ],
-//         [
-//             32.05759,
-//             118.8982
-//         ],
-//         [
-//             32.058105,
-//             118.897942
-//         ],
-//         [
-//             32.058523,
-//             118.897733
-//         ],
-//         [
-//             32.058995,
-//             118.897502
-//         ],
-//         [
-//             32.059816,
-//             118.897009
-//         ],
-//         [
-//             32.060224,
-//             118.89673
-//         ],
-//         [
-//             32.060492,
-//             118.896548
-//         ],
-//         [
-//             32.061173,
-//             118.896075
-//         ],
-//         [
-//             32.062085,
-//             118.895405
-//         ],
-//         [
-//             32.063861,
-//             118.894042
-//         ],
-//         [
-//             32.064124,
-//             118.893838
-//         ],
-//         [
-//             32.064778,
-//             118.893345
-//         ],
-//         [
-//             32.065025,
-//             118.893163
-//         ],
-//         [
-//             32.065776,
-//             118.892599
-//         ],
-//         [
-//             32.066114,
-//             118.892353
-//         ],
-//         [
-//             32.067165,
-//             118.891521
-//         ],
-//         [
-//             32.069091,
-//             118.890046
-//         ],
-//         [
-//             32.075528,
-//             118.885143
-//         ],
-//         [
-//             32.076274,
-//             118.884563
-//         ],
-//         [
-//             32.076929,
-//             118.884081
-//         ],
-//         [
-//             32.077272,
-//             118.883834
-//         ],
-//         [
-//             32.077615,
-//             118.883566
-//         ],
-//         [
-//             32.079278,
-//             118.882348
-//         ],
-//         [
-//             32.079525,
-//             118.882187
-//         ],
-//         [
-//             32.080078,
-//             118.881817
-//         ],
-//         [
-//             32.080651,
-//             118.881431
-//         ],
-//         [
-//             32.081124,
-//             118.881066
-//         ],
-//         [
-//             32.081542,
-//             118.880792
-//         ],
-//         [
-//             32.082325,
-//             118.880352
-//         ],
-//         [
-//             32.08291,
-//             118.880041
-//         ],
-//         [
-//             32.083843,
-//             118.879542
-//         ],
-//         [
-//             32.084798,
-//             118.879086
-//         ],
-//         [
-//             32.085394,
-//             118.878818
-//         ],
-//         [
-//             32.085989,
-//             118.878555
-//         ],
-//         [
-//             32.08792,
-//             118.87782
-//         ],
-//         [
-//             32.089149,
-//             118.877396
-//         ],
-//         [
-//             32.091064,
-//             118.876721
-//         ],
-//         [
-//             32.092325,
-//             118.876275
-//         ],
-//         [
-//             32.092325,
-//             118.876275
-//         ],
-//         [
-//             32.092641,
-//             118.876308
-//         ],
-//         [
-//             32.092845,
-//             118.876318
-//         ],
-//         [
-//             32.093167,
-//             118.876372
-//         ],
-//         [
-//             32.093403,
-//             118.876447
-//         ],
-//         [
-//             32.093606,
-//             118.876533
-//         ],
-//         [
-//             32.093784,
-//             118.87663
-//         ],
-//         [
-//             32.094025,
-//             118.87678
-//         ],
-//         [
-//             32.094213,
-//             118.87693
-//         ],
-//         [
-//             32.09446,
-//             118.877139
-//         ],
-//         [
-//             32.094744,
-//             118.877407
-//         ],
-//         [
-//             32.094948,
-//             118.877643
-//         ],
-//         [
-//             32.095119,
-//             118.877895
-//         ],
-//         [
-//             32.09543,
-//             118.878437
-//         ],
-//         [
-//             32.095532,
-//             118.878834
-//         ],
-//         [
-//             32.095634,
-//             118.879231
-//         ],
-//         [
-//             32.09571,
-//             118.879558
-//         ],
-//         [
-//             32.095736,
-//             118.879682
-//         ],
-//         [
-//             32.095811,
-//             118.879971
-//         ],
-//         [
-//             32.095811,
-//             118.879971
-//         ],
-//         [
-//             32.095833,
-//             118.880041
-//         ],
-//         [
-//             32.095886,
-//             118.880261
-//         ],
-//         [
-//             32.096246,
-//             118.881645
-//         ],
-//         [
-//             32.096847,
-//             118.884027
-//         ],
-//         [
-//             32.097035,
-//             118.88473
-//         ],
-//         [
-//             32.097319,
-//             118.885631
-//         ],
-//         [
-//             32.097662,
-//             118.88658
-//         ],
-//         [
-//             32.098043,
-//             118.887423
-//         ],
-//         [
-//             32.098177,
-//             118.887712
-//         ],
-//         [
-//             32.098424,
-//             118.888201
-//         ],
-//         [
-//             32.098778,
-//             118.888828
-//         ],
-//         [
-//             32.098875,
-//             118.889
-//         ],
-//         [
-//             32.098939,
-//             118.889107
-//         ],
-//         [
-//             32.099255,
-//             118.889574
-//         ],
-//         [
-//             32.099518,
-//             118.889928
-//         ],
-//         [
-//             32.099631,
-//             118.890083
-//         ],
-//         [
-//             32.100108,
-//             118.890641
-//         ],
-//         [
-//             32.100715,
-//             118.891306
-//         ],
-//         [
-//             32.101272,
-//             118.891848
-//         ],
-//         [
-//             32.101589,
-//             118.892138
-//         ],
-//         [
-//             32.10205,
-//             118.892519
-//         ],
-//         [
-//             32.102308,
-//             118.892723
-//         ],
-//         [
-//             32.104083,
-//             118.894042
-//         ],
-//         [
-//             32.104346,
-//             118.894241
-//         ],
-//         [
-//             32.105585,
-//             118.895163
-//         ],
-//         [
-//             32.110226,
-//             118.898827
-//         ],
-//         [
-//             32.110971,
-//             118.899503
-//         ],
-//         [
-//             32.111095,
-//             118.899616
-//         ],
-//         [
-//             32.11162,
-//             118.900099
-//         ],
-//         [
-//             32.112468,
-//             118.900941
-//         ],
-//         [
-//             32.113036,
-//             118.901531
-//         ],
-//         [
-//             32.113085,
-//             118.901585
-//         ],
-//         [
-//             32.113659,
-//             118.902191
-//         ],
-//         [
-//             32.11397,
-//             118.90255
-//         ],
-//         [
-//             32.114222,
-//             118.902851
-//         ],
-//         [
-//             32.114533,
-//             118.903183
-//         ],
-//         [
-//             32.114995,
-//             118.903725
-//         ],
-//         [
-//             32.11529,
-//             118.904079
-//         ],
-//         [
-//             32.115644,
-//             118.904519
-//         ],
-//         [
-//             32.116336,
-//             118.905415
-//         ],
-//         [
-//             32.116652,
-//             118.90586
-//         ],
-//         [
-//             32.116716,
-//             118.905951
-//         ],
-//         [
-//             32.117537,
-//             118.907126
-//         ],
-//         [
-//             32.11839,
-//             118.908408
-//         ],
-//         [
-//             32.118921,
-//             118.909256
-//         ],
-//         [
-//             32.119173,
-//             118.909696
-//         ],
-//         [
-//             32.119426,
-//             118.91013
-//         ],
-//         [
-//             32.120134,
-//             118.911412
-//         ],
-//         [
-//             32.12044,
-//             118.911992
-//         ],
-//         [
-//             32.120691,
-//             118.912496
-//         ],
-//         [
-//             32.12097,
-//             118.913043
-//         ],
-//         [
-//             32.12125,
-//             118.91359
-//         ],
-//         [
-//             32.122381,
-//             118.916015
-//         ],
-//         [
-//             32.124023,
-//             118.919507
-//         ],
-//         [
-//             32.124253,
-//             118.920001
-//         ],
-//         [
-//             32.124398,
-//             118.920333
-//         ],
-//         [
-//             32.124844,
-//             118.921369
-//         ],
-//         [
-//             32.124924,
-//             118.921562
-//         ],
-//         [
-//             32.125396,
-//             118.922645
-//         ],
-//         [
-//             32.125396,
-//             118.922645
-//         ],
-//         [
-//             32.125471,
-//             118.923112
-//         ],
-//         [
-//             32.125831,
-//             118.924056
-//         ],
-//         [
-//             32.126244,
-//             118.925006
-//         ],
-//         [
-//             32.126984,
-//             118.92662
-//         ],
-//         [
-//             32.127274,
-//             118.927227
-//         ],
-//         [
-//             32.127376,
-//             118.927339
-//         ],
-//         [
-//             32.127676,
-//             118.928015
-//         ],
-//         [
-//             32.127976,
-//             118.928691
-//         ],
-//         [
-//             32.127976,
-//             118.928691
-//         ],
-//         [
-//             32.127365,
-//             118.929523
-//         ],
-//         [
-//             32.127199,
-//             118.929705
-//         ],
-//         [
-//             32.126845,
-//             118.930043
-//         ],
-//         [
-//             32.126775,
-//             118.930086
-//         ],
-//         [
-//             32.124168,
-//             118.931674
-//         ],
-//         [
-//             32.124023,
-//             118.93176
-//         ],
-//         [
-//             32.122961,
-//             118.932403
-//         ],
-//         [
-//             32.122301,
-//             118.932773
-//         ],
-//         [
-//             32.122043,
-//             118.932934
-//         ],
-//         [
-//             32.121866,
-//             118.933036
-//         ],
-//         [
-//             32.120885,
-//             118.933648
-//         ],
-//         [
-//             32.119426,
-//             118.934538
-//         ],
-//         [
-//             32.119361,
-//             118.934576
-//         ],
-//         [
-//             32.117999,
-//             118.935386
-//         ],
-//         [
-//             32.117736,
-//             118.935504
-//         ],
-//         [
-//             32.117339,
-//             118.935649
-//         ],
-//         [
-//             32.117119,
-//             118.935708
-//         ],
-//         [
-//             32.116749,
-//             118.935772
-//         ],
-//         [
-//             32.116475,
-//             118.935799
-//         ],
-//         [
-//             32.116298,
-//             118.935799
-//         ],
-//         [
-//             32.116298,
-//             118.935799
-//         ],
-//         [
-//             32.116276,
-//             118.93567
-//         ],
-//         [
-//             32.116218,
-//             118.935504
-//         ],
-//         [
-//             32.116219,
-//             118.935502
-//         ]
-//     ]
-// ]
-                                // Add the origin and destination points to the polyline (ensure they are part of the route)
-                                const line = L.polyline(polyline, {
-                                    color: "#5C7CFA",
-                                    smoothFactor: 1,
-                                    weight: 4,
-                                }).addTo(map);
-                                map.fitBounds(line.getBounds());
-                            },
-                        );
-                    } else {
-                        const lat = parseFloat(locations[0].split(",")[1]);
-                        const lng = parseFloat(locations[0].split(",")[0]);
-                        map.flyTo(latLng(lat, lng));
-                    }
-                }
-            });
-
-            updatedRoutes.forEach((route) => {
-                console.log("Route updated:", route);
-            });
-
-            removedRoutes.forEach((route) => {
-                console.log("Route removed:", route);
-            });
-
-            // Update the ref with the current routes for the next render
-            prevRoutesRef.current = currentRoutes;
+          } else {
+            const lat = parseFloat(locations[0].split(",")[1]);
+            const lng = parseFloat(locations[0].split(",")[0]);
+            map.flyTo(latLng(lat, lng));
+          }
         }
-    }, [routes]);
+      });
 
-    return <div ref={mapRef} className="h-screen" />;
+      updatedRoutes.forEach((route) => {
+        console.log("Route updated:", route);
+      });
+
+      removedRoutes.forEach((route) => {
+        console.log("Route removed:", route);
+      });
+
+      // Update the ref with the current routes for the next render
+      prevRoutesRef.current = currentRoutes;
+    }
+  }, [routes]);
+
+  return <div ref={mapRef} className="h-screen" />;
 };
 
 export default MapComponent;

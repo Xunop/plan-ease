@@ -1,6 +1,7 @@
 import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useEffect, useState } from "react";
 import { Doc as YDoc } from "yjs";
+import { IndexeddbPersistence } from "y-indexeddb";
 
 function getProvider({ docId, yDoc }: { docId: string; yDoc: YDoc }) {
   return new HocuspocusProvider({
@@ -37,6 +38,8 @@ export const useCollaboration = ({
     if (enabled) {
       // When enabled, initialize the provider and yDoc
       const yDoc = new YDoc(); // Initialize the YDoc instance
+
+      // new IndexeddbPersistence("y-document", yDoc);
       const providerInstance = getProvider({ docId, yDoc }); // Initialize the provider with the docId
 
       if (isMounted) {

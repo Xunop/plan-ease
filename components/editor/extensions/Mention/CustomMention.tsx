@@ -3,41 +3,62 @@ import { useEffect } from "react";
 import { default as MentionExtension } from "@tiptap/extension-mention";
 import { ReactNodeViewRenderer, mergeAttributes } from "@tiptap/react";
 import { useBoundStore } from "@/providers/location-store-provider";
+import localForage from "localforage";
+import { AmapPlace } from "@/lib/api/gaode/types";
+import localforage from "localforage";
+import {
+  Popover,
+  PopoverAnchor,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 function Mention(props: NodeViewProps) {
-  const { locations, AddLocation, RemoveLocation } = useBoundStore(
-    (state) => state,
-  );
+  const { places, AddPlace, RemovePlace, AddLocation, RemoveLocation } = useBoundStore((state) => state);
   useEffect(() => {
-    const id = props.node.attrs.id;
-    const location = {
-      id: id,
-      name: props.node.attrs.label,
-      location: props.node.attrs.location,
-    };
-    AddLocation(location);
-    // console.log(`Mention ${props.node.attrs.label} added`);
+    const placeId = props.node.attrs.id;
+    console.log(`Mention ${props.node.attrs.label} added`);
+    // localforage.getItem(placeId).then((place) => {
+    //   AddPlace(place as AmapPlace);
+    // });
+    AddLocation(props.node.attrs.location)
+    // Retrial places from local forage
     return () => {
-      RemoveLocation(id);
-      // console.log(`Mention ${props.node.attrs.label} deleted`);
+      // RemovePlace(placeId);
+      RemoveLocation(props.node.attrs.location)
+      console.log(`Mention ${props.node.attrs.label} deleted`);
     };
   }, []);
 
   useEffect(() => {
-    console.log("debug::locations:", locations);
-  }, [locations]);
+    console.log("debug::places:", places);
+  }, [places]);
+
+  const handleClick = () => {
+    console.log("click mention: ", props.node.attrs.label);
+  };
 
   const id = props.node.attrs.id;
   return (
     <NodeViewWrapper className="inline w-fit ">
-      <span
-        className="mention"
-        data-id={id}
-        {...props.HTMLAttributes}
-        {...props.extension.options.HTMLAttributes}
-      >
-        @{props.node.attrs.label}
-      </span>
+      <Popover>
+        <PopoverTrigger asChild>
+          <span
+            onClick={handleClick}
+            className="mention"
+            data-id={id}
+            {...props.HTMLAttributes}
+            {...props.extension.options.HTMLAttributes}
+          >
+            @{props.node.attrs.label}
+          </span>
+        </PopoverTrigger>
+        <PopoverContent align="center" className="w-fit">
+          <div>
+            test
+          </div>
+        </PopoverContent>
+      </Popover>
     </NodeViewWrapper>
   );
 }

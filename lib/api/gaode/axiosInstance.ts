@@ -4,7 +4,7 @@ import axiosRetry from 'axios-retry';
 
 // Create a new Axios instance
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: 'https://restapi.amap.com/v3/',  // Base URL for your API
+  baseURL: 'https://restapi.amap.com/',  // Base URL for your API
   timeout: 10000,  // Set timeout for requests (10 seconds)
 });
 

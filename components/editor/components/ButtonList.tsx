@@ -50,7 +50,6 @@ type ButtonListProps = {
 
 const ButtonList = ({ pos, outerDivRef, editor }: ButtonListProps) => {
     const docSize = editor.state.doc.content.size;
-    console.log("docSize", docSize);
     if (pos.nodePos < 0 || pos.nodePos >= docSize) {
         console.warn("Invalid position:", pos.nodePos);
         return null;

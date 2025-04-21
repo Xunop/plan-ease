@@ -11,9 +11,6 @@ import Bold from "@tiptap/extension-bold";
 import Italic from "@tiptap/extension-italic";
 import Strike from "@tiptap/extension-strike";
 import Underline from "@tiptap/extension-underline";
-// import DropCursor from "@tiptap/extension-dropcursor";
-// import GapCursor from "@tiptap/extension-gapcursor";
-// import HardBreak from "@tiptap/extension-hard-break";
 import Heading from "@tiptap/extension-heading";
 import Blockquote from "@tiptap/extension-blockquote";
 
@@ -33,13 +30,10 @@ import { HocuspocusProvider } from "@hocuspocus/provider";
 import { generateRandomColor, generateRandomUsername } from "@/lib/utils/index";
 import { AnyExtension } from "@tiptap/core";
 import React, { useEffect } from "react";
-import { createPortal } from "react-dom";
 import Cursor from "./CollaborationCursor/components/Cursor";
 // import Mention from "@tiptap/extension-mention";
 import Mention from "./Mention";
-import dynamic from "next/dynamic";
 import Suggestion from "./Suggestion";
-import { DataRoute } from "./DataRoute/DataRoute";
 import { PlanItem } from "./PlanItem";
 import PlanList from "./PlanList";
 
@@ -55,14 +49,6 @@ export const ExtensionKit = ({
     Text,
     CharacterCount,
 
-    // DropCursor.configure({
-    //   width: 2,
-    //   class: "notitap-dropcursor w-full ml-[64px]",
-    //   color: "skyblue",
-    // }),
-    // GapCursor,
-    // HardBreak,
-    //
     Bold,
     Italic,
     Strike,
@@ -88,7 +74,7 @@ export const ExtensionKit = ({
     }),
 
     // DataRoute,
-    PlanList, // TODO:
+    PlanList,
     PlanItem,
 
     Heading.configure({
@@ -104,9 +90,9 @@ export const ExtensionKit = ({
       types: ["heading", "paragraph"],
     }),
 
-    Placeholder.configure({
-      placeholder: "Write somthing ...",
-    }),
+    // Placeholder.configure({
+    //   placeholder: "Write somthing ...",
+    // }),
 
     // Mention
     Mention.configure({

@@ -1,5 +1,6 @@
 "use client";
 
+import { Editor, Range } from "@tiptap/core";
 import { ReactRenderer } from "@tiptap/react";
 import SuggestionContent, { SuggestionContentRef } from "./SuggestionContent";
 import { fetchAmapTips } from "@/lib/api/gaode/search";
@@ -23,6 +24,7 @@ const throttledFetchAmapTips = throttle(
 
     try {
       const tips = await fetchAmapTips(trimmedQuery);
+      console.log("DEBUG::tips", tips);
       // const names = tips.map((tip) => tip.name);
       // const tips = response.tips.map((tip) => tip.name);
       return tips;
@@ -34,6 +36,7 @@ const throttledFetchAmapTips = throttle(
   1000,
 );
 
+// About suggestion implement, see https://github.com/ueberdosis/tiptap/blob/develop/packages/suggestion/src/suggestion.ts
 export default {
   items: async ({ query }: MentionProps): Promise<AmapTip[]> => {
     return await throttledFetchAmapTips(query);
@@ -71,5 +74,46 @@ export default {
         component?.destroy();
       },
     };
+  },
+
+  // Will insert a mention, called in the SuggestionContent.tsx
+  command: (props: { editor: Editor; range: Range; props: any }) => {
+    const editor = props.editor;
+    const range = props.range;
+    const cmdProps = props.props;
+    // increase range.to by one when the next node is of type "text"
+    // and starts with a space character
+    const nodeAfter = editor.view.state.selection.$to.nodeAfter;
+    const overrideSpace = nodeAfter?.text?.startsWith(" ");
+
+    if (overrideSpace) {
+      range.to += 1;
+    }
+
+    const location = cmdProps.location;
+    const id = cmdProps.id;
+    const label = cmdProps.label;
+
+    editor
+      .chain()
+      .focus()
+      .insertContentAt(range, [
+        {
+          type: "mention",
+          attrs: {
+            id: id,
+            location: location,
+            label: label,
+          },
+        },
+        {
+          type: "text",
+          text: " ",
+        },
+      ])
+      .run();
+
+    // get reference to `window` object from editor element, to support cross-frame JS usage
+    editor.view.dom.ownerDocument.defaultView?.getSelection()?.collapseToEnd();
   },
 };
