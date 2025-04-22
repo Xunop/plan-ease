@@ -141,14 +141,18 @@ const SuggestionContent = forwardRef<
   // }, [props.decorationNode]);
 
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const { AddLocation, places, AddPlace, RemovePlace } = useBoundStore((state) => state);
+  const { AddLocation, places, AddPlace, RemovePlace } = useBoundStore(
+    (state) => state,
+  );
 
   const selectItem = (index: number) => {
     const item = props.items[index];
 
     let place: AmapPlace;
 
+    // FIXME: `location` still need more check.
     if (item) {
+      // Use `location` as id, but formatted as `lng-lat`
       let uniqueId: string;
       let location: string;
       const id = item.id;
@@ -163,7 +167,6 @@ const SuggestionContent = forwardRef<
 
             // When selected a place, we need to store it.
             AddPlace(place);
-            // AddLocation(location)
             localforage.setItem(uniqueId, place).then(() => {
               // command implement see Suggestion.tsx
               props.command({
@@ -182,19 +185,28 @@ const SuggestionContent = forwardRef<
           if (value === null) {
             fetchAmapPlaceById(id)
               .then((places) => {
-                place = places[0];
-                location = place.location;
-                uniqueId =
-                  location.split(",")[0] + "-" + location.split(",")[1];
-                AddPlace(place);
-                // AddLocation(location);
-                localforage.setItem(uniqueId, place).then(() => {
-                  props.command({
-                    id: uniqueId,
-                    label: place.name,
-                    location: location,
+                if (places.length > 0) {
+                  place = places[0];
+                  location = place.location;
+                  uniqueId =
+                    location.split(",")[0] + "-" + location.split(",")[1];
+                  AddPlace(place);
+                  localforage.setItem(uniqueId, place).then(() => {
+                    props.command({
+                      id: uniqueId,
+                      label: place.name,
+                      location: location,
+                    });
                   });
-                });
+                } else {
+                  uniqueId =
+                    item.location.split(",")[0] + "-" + item.location.split(",")[1];
+                    props.command({
+                      id: uniqueId,
+                      label: item.name,
+                      location: item.location,
+                    });
+                }
               })
               .catch((error) => {
                 console.error("Error fetching place:", error);
@@ -300,7 +312,7 @@ const SuggestionContent = forwardRef<
                 className={index === selectedIndex ? "is-selected" : ""}
                 key={index}
                 onClick={() => selectItem(index)}
-                title={item.address || item.name}
+                title={item.name || item.address}
               >
                 {item.name}
               </button>

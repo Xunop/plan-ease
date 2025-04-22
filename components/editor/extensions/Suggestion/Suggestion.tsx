@@ -24,6 +24,7 @@ const throttledFetchAmapTips = throttle(
 
     try {
       const tips = await fetchAmapTips(trimmedQuery);
+      console.log("tips: ", tips)
       // const names = tips.map((tip) => tip.name);
       // const tips = response.tips.map((tip) => tip.name);
       return tips;

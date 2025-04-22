@@ -32,6 +32,7 @@ interface PlaceSlice {
   places: AmapPlace[];
   AddPlace: (place: AmapPlace) => void;
   RemovePlace: (id: string) => void;
+  GetPlace: (id: string) => void;
 }
 
 interface RouteSlice {
@@ -104,7 +105,10 @@ const createLocationSlice: StateCreator<Store, [], [], LocationSlice> = (
     })),
 });
 
-const createPlaceSlice: StateCreator<Store, [], [], PlaceSlice> = (set) => ({
+const createPlaceSlice: StateCreator<Store, [], [], PlaceSlice> = (
+  set,
+  get,
+) => ({
   places: defaultInitState.places,
   AddPlace: (place: AmapPlace) =>
     set((state) => ({
@@ -122,6 +126,15 @@ const createPlaceSlice: StateCreator<Store, [], [], PlaceSlice> = (set) => ({
         locations: route.locations.filter((locId) => locId !== id),
       })),
     })),
+  GetPlace: (id: string): AmapPlace | undefined => {
+    const state = get();
+
+    return state.places.find((place) => {
+      const placeId =
+        place.location.split(",")[0] + "-" + place.location.split(",")[1];
+      return id === placeId;
+    });
+  },
 });
 
 const createRouteSlice: StateCreator<Store, [], [], RouteSlice> = (

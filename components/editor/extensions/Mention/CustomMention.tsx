@@ -1,5 +1,5 @@
 import { NodeViewProps, NodeViewWrapper } from "@tiptap/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { default as MentionExtension } from "@tiptap/extension-mention";
 import { ReactNodeViewRenderer, mergeAttributes } from "@tiptap/react";
 import { useBoundStore } from "@/providers/location-store-provider";
@@ -8,55 +8,52 @@ import { AmapPlace } from "@/lib/api/gaode/types";
 import localforage from "localforage";
 import {
   Popover,
-  PopoverAnchor,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { PopoverEditor } from "./PopoverEditor";
 
 function Mention(props: NodeViewProps) {
-  const { places, AddPlace, RemovePlace, AddLocation, RemoveLocation } = useBoundStore((state) => state);
+  const { places, AddPlace, RemovePlace, AddLocation, RemoveLocation } =
+    useBoundStore((state) => state);
+  const [isOpen, setIsOpen] = useState(false);
+  const [place, setPlace] = useState<AmapPlace | null>(null);
+  const { id, label } = props.node.attrs;
+
   useEffect(() => {
-    const placeId = props.node.attrs.id;
     // console.log(`Mention ${props.node.attrs.label} added`);
-    // localforage.getItem(placeId).then((place) => {
-    //   AddPlace(place as AmapPlace);
-    // });
-    AddLocation(props.node.attrs.location)
+    const placeId = props.node.attrs.id;
     // Retrial places from local forage
+    localforage.getItem(placeId).then((place) => {
+      if (place !== null) {
+        AddPlace(place as AmapPlace);
+        setPlace(place as AmapPlace)
+      }
+    });
+
+    AddLocation(props.node.attrs.location);
     return () => {
       // RemovePlace(placeId);
-      RemoveLocation(props.node.attrs.location)
+      RemoveLocation(props.node.attrs.location);
       // console.log(`Mention ${props.node.attrs.label} deleted`);
     };
   }, []);
 
-  // useEffect(() => {
-  //   console.log("debug::places:", places);
-  // }, [places]);
-
-  const handleClick = () => {
-    console.log("click mention: ", props.node.attrs.label);
-  };
-
-  const id = props.node.attrs.id;
   return (
-    <NodeViewWrapper className="inline w-fit ">
-      <Popover>
+    <NodeViewWrapper className="inline w-fit">
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <span
-            onClick={handleClick}
+            onClick={() => setIsOpen(true)}
             className="mention"
-            data-id={id}
             {...props.HTMLAttributes}
             {...props.extension.options.HTMLAttributes}
           >
-            @{props.node.attrs.label}
+            @{label}
           </span>
         </PopoverTrigger>
-        <PopoverContent align="center" className="w-fit">
-          <div>
-            test
-          </div>
+        <PopoverContent>
+          <PopoverEditor mentionId={id} editor={props.editor} place={place} />
         </PopoverContent>
       </Popover>
     </NodeViewWrapper>

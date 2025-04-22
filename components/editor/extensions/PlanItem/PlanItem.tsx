@@ -70,7 +70,6 @@ function PlanItemComponent(props: NodeViewProps) {
         const from = props.editor.state.selection.from;
         const pos = props.editor.view.coordsAtPos(from);
         if (pos) {
-            console.log(`from: ${from}, pos: `, pos)
             const lineHei = pos.bottom - pos.top;
             SetButtonListOpen(true);
             SetButtonListPos({

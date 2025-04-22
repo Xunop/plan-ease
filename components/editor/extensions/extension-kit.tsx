@@ -111,7 +111,9 @@ export const ExtensionKit = ({
   ];
 
   if (provider && ydoc) {
-    extensions.push(Collaboration.configure({ document: ydoc }));
+    extensions.push(
+      Collaboration.configure({ document: ydoc, field: "content" }), // Main editor content field
+    );
   }
   if (provider) {
     extensions.push(

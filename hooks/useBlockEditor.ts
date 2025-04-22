@@ -15,13 +15,11 @@ export const useBlockEditor = ({
   ydoc,
   provider,
   userId,
-  userName = "Maxi",
   ...editorOptions
 }: {
   ydoc: YDoc | null;
   provider?: HocuspocusProvider | null | undefined;
   userId?: string;
-  userName?: string;
 } & Partial<Omit<EditorOptions, "extensions">>) => {
   const [collabState, setCollabState] = useState<WebSocketStatus>(
     provider ? WebSocketStatus.Connecting : WebSocketStatus.Disconnected,
