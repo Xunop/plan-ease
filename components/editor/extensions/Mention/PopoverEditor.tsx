@@ -161,7 +161,7 @@ export function PopoverEditor({
   }
 
   return (
-    <div className="bg-white shadow-lg rounded-lg p-4">
+    <div className="bg-white shadow-lg rounded-lg p-1 h-80 overflow-auto">
       <EditorContent
         editor={popoverEditor}
         className="list-disc p-1 marker:text-gray-300"

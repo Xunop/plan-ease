@@ -11,9 +11,6 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-const MapComponent = dynamic(() => import("@/components/map/leaflet"), {
-    ssr: false,
-});
 
 export default function Document({
     params,

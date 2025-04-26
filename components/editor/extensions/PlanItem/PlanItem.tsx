@@ -5,8 +5,9 @@ import {
     ReactNodeViewRenderer,
 } from "@tiptap/react";
 import { useState } from "react";
-import "./style.scss";
 import { useBoundStore } from "@/providers/location-store-provider";
+
+import styles from "./style.module.scss"
 
 export const PlanItem = Node.create({
     name: "planItem",
@@ -94,7 +95,7 @@ function PlanItemComponent(props: NodeViewProps) {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
                 onClick={handleClick}
-                className={`${isHovered ? "plan-item-content-hovered" : "plan-item-content"}`}
+                className={`${isHovered ? styles["plan-item-content-hovered"] : styles["plan-item-content"]}`}
                 // data-pos={props.getPos()}
             />
         </NodeViewWrapper>

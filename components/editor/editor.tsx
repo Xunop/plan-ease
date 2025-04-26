@@ -1,3 +1,5 @@
+// import styles from "./style.module.scss";
+import "./style.scss";
 import { Editor } from "@tiptap/core";
 import { EditorContent } from "@tiptap/react";
 
@@ -6,7 +8,6 @@ import { Doc as YDoc } from "yjs";
 
 import { HocuspocusProvider } from "@hocuspocus/provider";
 
-import "./style.scss";
 import { useBoundStore } from "@/providers/location-store-provider";
 import ButtonList from "./components/ButtonList";
 import { useEffect, useRef, useState } from "react";
@@ -117,6 +118,7 @@ const BlockEditor = ({
             <EditorContent
                 editor={editorProps}
                 spellCheck={false}
+                // className={`${styles.tiptap} ${styles.body} ${styles["column-half"]} flex-1 overflow-y-auto h-full rounded-3xl bg-white`}
                 className="flex-1 overflow-y-auto h-full rounded-3xl bg-white"
             ></EditorContent>
             {buttonListOpen && (

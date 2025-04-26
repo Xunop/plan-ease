@@ -1,0 +1,24 @@
+// .plan-list {
+//     >div:first-child>div:first-child>div:first-child>li:first-child {
+//         list-style: none;
+//         font-weight: bold;
+//         font-size: 1.2em;
+//         margin-bottom: 0.5em;
+//     }
+// }
+
+/* Style the first li in every planList as title */
+.plan-list > div:first-child > div:first-child > div:first-child > li:first-child {
+  list-style: none;          /* Remove bullet for title */
+  font-weight: bold;         /* Bold text for title */
+  // font-size: 1.2em;          /* Larger font size */
+  // margin-bottom: 0.5em;      /* Space below title */
+}
+
+/* Reset styles for first li in nested planLists */
+.plan-list .plan-list > div:first-child > div:first-child > div:first-child > li:first-child {
+  list-style: revert;        /* Restore default list style */
+  font-weight: normal;       /* Normal font weight */
+  font-size: inherit;        /* Inherit font size */
+  margin-bottom: revert;     /* Restore default margin */
+}

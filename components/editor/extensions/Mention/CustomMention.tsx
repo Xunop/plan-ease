@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { default as MentionExtension } from "@tiptap/extension-mention";
 import { ReactNodeViewRenderer, mergeAttributes } from "@tiptap/react";
 import { useBoundStore } from "@/providers/location-store-provider";
-import localForage from "localforage";
 import { AmapPlace } from "@/lib/api/gaode/types";
 import localforage from "localforage";
 import {

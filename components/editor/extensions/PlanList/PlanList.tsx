@@ -11,6 +11,8 @@ import {
 } from "@tiptap/react";
 import { useRef } from "react";
 
+import styles from "./style.module.scss";
+
 const inputRegex = /^~\s$/;
 
 const PlanList = Node.create({
@@ -61,7 +63,13 @@ function PlanListComponent(props: NodeViewProps) {
   const listRef = useRef<HTMLUListElement>(null);
 
   return (
-    <NodeViewWrapper as="ul" ref={listRef} className="relative" data-type="planList">
+    <NodeViewWrapper
+      as="ul"
+      ref={listRef}
+      // className={`relative ${styles["plan-list"]}`}
+      className="relative"
+      data-type="planList"
+    >
       <NodeViewContent />
     </NodeViewWrapper>
   );

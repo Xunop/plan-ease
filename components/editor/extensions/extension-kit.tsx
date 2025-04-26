@@ -77,9 +77,9 @@ export const ExtensionKit = ({
     PlanList,
     PlanItem,
 
-    Heading.configure({
-      levels: [1, 2, 3],
-    }),
+    // Heading.configure({
+    //   levels: [1, 2, 3],
+    // }),
     Blockquote,
 
     TextAlign.extend({

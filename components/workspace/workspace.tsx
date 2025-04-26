@@ -1,3 +1,5 @@
+'use client';
+import "./style.scss";
 import BlockEditor from "@/components/editor";
 import {
     ResizableHandle,
@@ -7,12 +9,11 @@ import {
 import { useBlockEditor } from "@/hooks/useBlockEditor";
 import { HocuspocusProvider, WebSocketStatus } from "@hocuspocus/provider";
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Doc as YDoc } from "yjs";
 import { EditorHeader } from "../editor/components/editor-header";
 
 import { Icon } from "../ui/icon";
-import "./style.scss";
 const MapComponent = dynamic(() => import("../map/leaflet"), { ssr: false });
 
 const Workspace = ({
