@@ -1,0 +1,79 @@
+// Base styles for the date node wrapper
+.date-node-wrapper {
+  display: inline-flex; // Use flex to align button and input
+  align-items: center;
+  // background-color: #f0f0f0;     // Default background
+  color: #5c7cfa;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: 0 2px;
+  white-space: nowrap;
+  vertical-align: middle; // Align nicely with text
+  position: relative; // For potential absolute positioning inside
+
+  // Modifier for empty state
+  // & refers to .date-node-wrapper
+  &.is-empty {
+    color: #888;
+    background-color: #fafafa;
+    border: 1px dashed #ccc;
+  }
+
+  // --- Editing State ---
+  // & refers to .date-node-wrapper
+  &.is-editing {
+    background-color: #e6f7ff; // Light blue background when editing
+    border: 1px solid #91d5ff;
+    padding-left: 0; // Adjust padding to accommodate button
+
+    // Style the direct child button when editing
+    >button {
+      margin-right: 4px;
+      margin-left: 2px;
+      flex-shrink: 0; // Prevent button from shrinking
+    }
+  }
+
+  // Styles for the editable input span (assuming it's nested inside the wrapper)
+  .date-node-input {
+    outline: none;
+    min-width: 40px; // Ensure some minimum width
+    padding: 0 3px;
+    background-color: transparent;
+    border: none;
+    display: inline-block; // Needed for focus/cursor
+  }
+}
+
+// Contextual styles when inside ProseMirror
+.ProseMirror {
+
+  // --- Display State Hover Effects ---
+  .date-node-wrapper:not(.is-editing) {
+
+    // Default hover effect when not editing
+    // & here refers to .date-node-wrapper:not(.is-editing)
+    &:hover {
+      background-color: #e0e0e0; // Add hover effect to indicate clickability
+      cursor: pointer;
+    }
+  }
+
+  // When ProseMirror itself is NOT focused
+  // & here refers to .ProseMirror
+  &:not(.ProseMirror-focused) {
+    .date-node-wrapper:not(.is-editing) {
+
+      // Modify hover effect when editor not focused
+      // & here refers to .date-node-wrapper:not(.is-editing) within the :not(.ProseMirror-focused) context
+      &:hover {
+        background-color: #f0f0f0; // Revert to base or less prominent bg
+        cursor: default;
+      }
+    }
+  }
+}
+
+/* Ensure popover content has higher z-index if needed */
+/* .tiptap-popover {} */

@@ -36,6 +36,7 @@ import Mention from "./Mention";
 import Suggestion from "./Suggestion";
 import { PlanItem } from "./PlanItem";
 import PlanList from "./PlanList";
+import DateNode from "./Date/Date";
 
 export const ExtensionKit = ({
   ydoc,
@@ -76,6 +77,7 @@ export const ExtensionKit = ({
     // DataRoute,
     PlanList,
     PlanItem,
+    DateNode,
 
     // Heading.configure({
     //   levels: [1, 2, 3],

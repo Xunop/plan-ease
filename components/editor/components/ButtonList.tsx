@@ -1,9 +1,7 @@
 import { Icon } from "@/components/ui/icon";
 import { useBoundStore } from "@/providers/location-store-provider";
 import { Editor } from "@tiptap/core";
-import { BookIcon } from "lucide-react";
-import { Node } from "prosemirror-model";
-import React, { useEffect } from "react";
+import React  from "react";
 
 interface ButtonListComponentProps {
     buttons: {
