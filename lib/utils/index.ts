@@ -1,19 +1,20 @@
-import { type ClassValue, clsx } from 'clsx'
-import { twMerge } from 'tailwind-merge'
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function generateRandomUsername(length: number = 8): string {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let username = '';
-  
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let username = "";
+
   for (let i = 0; i < length; i++) {
     const randomIndex = Math.floor(Math.random() * characters.length);
     username += characters[randomIndex];
   }
-  
+
   return username;
 }
 
@@ -25,13 +26,36 @@ export function generateRandomColor(): string {
   const b = getRandomChannelValue(); // blue
 
   // RGB to hex
-  const color = `#${(1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase()}`;
-  
+  const color = `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1).toUpperCase()}`;
+
   return color;
 }
 
-export * from './cssVar'
+export function generateFixedLengthId(
+  length: number = 8,
+  prefix: string = "id-",
+): string {
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  /*
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  if (length > 0) {
+    result = letters.charAt(Math.floor(Math.random() * letters.length));
+    for (let i = 1; i < length; i++) {
+       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+  }
+  */
+  return prefix + result;
+}
+
+export * from "./cssVar";
 // export * from './getConnectionText'
-export * from './getRenderContainer'
+export * from "./getRenderContainer";
 // export * from './isCustomNodeSelected'
-export * from './isTextSelected'
+export * from "./isTextSelected";

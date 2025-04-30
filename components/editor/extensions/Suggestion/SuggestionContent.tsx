@@ -20,6 +20,7 @@ import {
 } from "@/lib/api/gaode/search";
 import { useBoundStore } from "@/providers/location-store-provider";
 import localforage from "localforage";
+import { generateFixedLengthId } from "@/lib/utils/index";
 
 interface SuggestionContentProps {
   items: AmapTip[];
@@ -153,17 +154,18 @@ const SuggestionContent = forwardRef<
     // FIXME: `location` still need more check.
     if (item) {
       // Use `location` as id, but formatted as `lng-lat`
-      let uniqueId: string;
+      // let uniqueId: string;
+      const uniqueId = generateFixedLengthId(8, "mention-")
       let location: string;
-      const id = item.id;
+      const placeId = item.id;
       // The id will no return when search a city.
-      if (Array.isArray(id) && id.length === 0) {
+      if (Array.isArray(placeId) && placeId.length === 0) {
         // Fetch location if not available
         fetchAmapPlaceByKeywords(item.name)
           .then((places) => {
             place = places[0];
             location = place.location;
-            uniqueId = location.split(",")[0] + "-" + location.split(",")[1];
+            // uniqueId = location.split(",")[0] + "-" + location.split(",")[1];
 
             // When selected a place, we need to store it.
             AddPlace(place);
@@ -181,15 +183,14 @@ const SuggestionContent = forwardRef<
           });
       } else {
         // First get place from localforage, if not exist will to fetch from remote
-        localforage.getItem(id).then((value) => {
+        localforage.getItem(uniqueId).then((value) => {
           if (value === null) {
-            fetchAmapPlaceById(id)
+            fetchAmapPlaceById(placeId)
               .then((places) => {
                 if (places.length > 0) {
                   place = places[0];
                   location = place.location;
-                  uniqueId =
-                    location.split(",")[0] + "-" + location.split(",")[1];
+                  // uniqueId = location.split(",")[0] + "-" + location.split(",")[1];
                   AddPlace(place);
                   localforage.setItem(uniqueId, place).then(() => {
                     props.command({
@@ -199,13 +200,12 @@ const SuggestionContent = forwardRef<
                     });
                   });
                 } else {
-                  uniqueId =
-                    item.location.split(",")[0] + "-" + item.location.split(",")[1];
-                    props.command({
-                      id: uniqueId,
-                      label: item.name,
-                      location: item.location,
-                    });
+                  // uniqueId = item.location.split(",")[0] + "-" + item.location.split(",")[1];
+                  props.command({
+                    id: uniqueId,
+                    label: item.name,
+                    location: item.location,
+                  });
                 }
               })
               .catch((error) => {

@@ -1,0 +1,181 @@
+import {
+  Node,
+  mergeAttributes,
+  InputRule,
+  Extension, // Use Extension to bundle Node and InputRule
+} from "@tiptap/core";
+import { ReactNodeViewRenderer } from "@tiptap/react";
+import { CommandNodeComponent } from "./CommandNodeComponent"; // Adjust import path
+
+// Define the attributes for our command node
+export interface CommandNodeOptions {
+  HTMLAttributes: Record<string, any>;
+}
+
+// Define the type for the attributes stored in the node
+declare module "@tiptap/core" {
+  interface Commands<ReturnType> {
+    commandNode: {
+      /**
+       * Insert a command node
+       */
+      insertCommandNode: (attributes: { command: string; data: string | null }) => ReturnType;
+    };
+  }
+}
+
+// --- The Command Node Definition ---
+// This node will represent the placeholder like {{data}}
+const CommandNode = Node.create<CommandNodeOptions>({
+  name: "commandNode",
+  group: "inline", // Displayed inline with text
+  inline: true,
+  atom: true, // Treat as a single, indivisible unit; content not directly editable
+  selectable: true, // Allows the node to be selected
+  draggable: true, // Allows the node to be dragged
+
+  addOptions() {
+    return {
+      HTMLAttributes: {}, // Default HTML attributes
+    };
+  },
+
+  // Define attributes to store data within the node
+  addAttributes() {
+    return {
+      command: {
+        default: "",
+        parseHTML: (element) => element.getAttribute("data-command"),
+        renderHTML: (attributes) => ({ "data-command": attributes.command }),
+      },
+      data: {
+        default: null, // Store the result from the "API call"
+        parseHTML: (element) => element.getAttribute("data-result"), // Use data-result to avoid conflict with dataset
+        renderHTML: (attributes) => ({ "data-result": attributes.data }),
+      },
+    };
+  },
+
+  // How to render this node to HTML
+  renderHTML({ node, HTMLAttributes }) {
+    // Use a span for inline rendering
+    return [
+      "span",
+      mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), // Includes data-command and data-result from addAttributes
+      `{{${node.attrs.data ?? `Loading ${node.attrs.command}...`}}}`, // Render fallback text if data is null
+    ];
+  },
+
+  // How to parse this node from HTML
+  parseHTML() {
+    return [
+      {
+        tag: `span[data-command]`, // Matches spans that have the data-command attribute
+        // Optional: Add getAttrs to extract attributes during parsing if needed,
+        // but renderHTML/addAttributes handles basic cases
+      },
+    ];
+  },
+
+  // Use the React component for rendering in the editor
+  addNodeView() {
+    return ReactNodeViewRenderer(CommandNodeComponent);
+  },
+
+   // Add a command to insert the node programmatically if needed
+  addCommands() {
+    return {
+      insertCommandNode:
+        (attributes) =>
+        ({ chain }) => {
+          return chain()
+            .insertContent({
+              type: this.name,
+              attrs: attributes,
+            })
+            // Set cursor after the inserted node
+            .setNodeSelection(chain().state.selection.from)
+            .run();
+        },
+    };
+  },
+});
+
+// --- Input Rule Definition ---
+// Regex to match / followed by one or more letters at the end of input
+// Example: /Weather
+const SLASH_COMMAND_REGEX = /^\/([a-zA-Z]+)$/;
+
+// Function to simulate API call (replace with actual fetch later)
+function simulateApiCall(command: string): Promise<string | null> {
+  console.log(`Simulating API call for command: ${command}`);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      let result: string | null = null;
+      if (command.toLowerCase() === "weather") {
+        result = "Sunny, 28°C";
+      } else if (command.toLowerCase() === "date") {
+        result = new Date().toLocaleDateString();
+      } else {
+        result = `Data for ${command}`; // Generic result for other commands
+      }
+      console.log(`Simulated result for ${command}: ${result}`);
+      resolve(result);
+    }, 500); // Simulate network delay
+  });
+}
+
+// --- The Slash Extension ---
+// Bundles the CommandNode and the InputRule together
+export const SlashExtension = Extension.create({
+  name: "slashCommand",
+
+  // Include the CommandNode defined above
+  addNodes() {
+    return [CommandNode];
+  },
+
+  // Add the input rule
+  addInputRules() {
+    return [
+      new InputRule({
+        find: SLASH_COMMAND_REGEX,
+        handler: async ({ state, range, match }) => {
+          const { tr } = state; // Transaction
+          const command = match[1]; // Get the captured command name (e.g., "Weather")
+
+          if (!command) return;
+
+          // Delete the trigger text (e.g., "/Weather")
+          tr.deleteRange(range.from, range.to);
+
+          // Simulate API call
+          // IMPORTANT: Standard InputRules are synchronous.
+          // For real async operations, a suggestion/command menu (`@tiptap/suggestion`)
+          // is usually a better fit. Here, we'll insert a placeholder
+          // and *could* update it later, but the basic input rule handles insertion directly.
+          // Let's simulate fetching and insert directly for simplicity as requested.
+
+          try {
+              // For a *real* async operation, you might insert a placeholder node first,
+              // then update its attributes once the data arrives.
+              // await is used here just to mimic the fetch simulation.
+              const apiResult = await simulateApiCall(command);
+
+              // Insert the CommandNode with the command and fetched data
+              const nodeType = state.schema.nodes.commandNode; // Get our node type
+              if (nodeType) {
+                  const newNode = nodeType.create({ command, data: apiResult });
+                  tr.insert(range.from, newNode); // Insert node at the start position of the deleted range
+              }
+          } catch (error) {
+              console.error("Failed to simulate API call for command:", command, error);
+              // Optionally insert an error state or do nothing
+          }
+        },
+      }),
+    ];
+  },
+});
+
+export default SlashExtension; // Export the combined extension

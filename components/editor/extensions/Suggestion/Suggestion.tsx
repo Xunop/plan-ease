@@ -39,7 +39,7 @@ const throttledFetchAmapTips = throttle(
 // About suggestion implement, see https://github.com/ueberdosis/tiptap/blob/develop/packages/suggestion/src/suggestion.ts
 export default {
   items: async ({ query }: MentionProps): Promise<AmapTip[]> => {
-    return await throttledFetchAmapTips(query);
+    return throttledFetchAmapTips(query);
   },
 
   render: () => {

@@ -6,6 +6,12 @@ import { useStore } from "zustand";
 
 export type StoreApi = ReturnType<typeof createBoundStore>;
 
+// Create the store instance ONCE
+const storeSingleton = createBoundStore();
+
+// Export the instance for direct access outside React
+export const getStore = () => storeSingleton;
+
 export const StoreContext = createContext<StoreApi | undefined>(
   undefined,
 );
@@ -17,13 +23,9 @@ export interface LocationStoreProviderProps {
 export const StoreProvider = ({
   children,
 }: LocationStoreProviderProps) => {
-  const storeRef = useRef<StoreApi | null>(null);
-  if (storeRef.current === null) {
-    storeRef.current = createBoundStore();
-  }
 
   return (
-    <StoreContext.Provider value={storeRef.current}>
+    <StoreContext.Provider value={storeSingleton}>
       {children}
     </StoreContext.Provider>
   );

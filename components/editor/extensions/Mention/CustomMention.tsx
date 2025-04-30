@@ -17,23 +17,22 @@ function Mention(props: NodeViewProps) {
     useBoundStore((state) => state);
   const [isOpen, setIsOpen] = useState(false);
   const [place, setPlace] = useState<AmapPlace | null>(null);
-  const { id, label } = props.node.attrs;
+  const { id, location, label } = props.node.attrs;
 
   useEffect(() => {
     // console.log(`Mention ${props.node.attrs.label} added`);
-    const placeId = props.node.attrs.id;
     // Retrial places from local forage
-    localforage.getItem(placeId).then((place) => {
+    localforage.getItem(id).then((place) => {
       if (place !== null) {
         AddPlace(place as AmapPlace);
-        setPlace(place as AmapPlace)
+        setPlace(place as AmapPlace);
       }
     });
 
-    AddLocation(props.node.attrs.location);
+    AddLocation(location, label, id);
     return () => {
       // RemovePlace(placeId);
-      RemoveLocation(props.node.attrs.location);
+      RemoveLocation(id);
       // console.log(`Mention ${props.node.attrs.label} deleted`);
     };
   }, []);

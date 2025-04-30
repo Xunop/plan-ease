@@ -32,25 +32,6 @@ const Workspace = ({
         },
     });
 
-    const [dragging, setDragging] = useState(false);
-
-    // Custom styles for the handle, with focus on the design from the image
-    const handleStyle: React.CSSProperties = {
-        width: "6px", // Thin handle
-        // height: "100%", // Full height of the parent container
-        backgroundColor: dragging
-            ? "rgba(255, 0, 255, 0.6)"
-            : "rgba(200, 200, 200, 0.8)", // Background color change when dragging
-        cursor: "ew-resize", // Horizontal resize cursor
-        position: "relative",
-        borderRadius: "3px", // Rounded edges to match design
-    };
-
-    const [isMapLoaded, setMapLoaded] = useState(false);
-    const handleMapLoaded = () => {
-        setMapLoaded(true);
-    };
-
     // const menuContainerRef = useRef(null);
     return editor ? (
         <div

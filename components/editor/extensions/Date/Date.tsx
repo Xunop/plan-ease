@@ -3,7 +3,6 @@
 import { mergeAttributes, Node, InputRule } from '@tiptap/core';
 import { ReactNodeViewRenderer } from '@tiptap/react';
 import { DateComponent } from './DateComponent'; // React component for NodeView
-import { DATE_FORMAT_STORAGE, parseDateString } from './dateUtils';
 
 // Trigger: "^" followed by a space
 const INPUT_REGEX = /\^\s$/;

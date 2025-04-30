@@ -1,10 +1,20 @@
 import { AmapPlace } from "@/lib/api/gaode/types";
 import { create, StateCreator } from "zustand";
+import Fuse from "fuse.js";
+import { pinyin } from "pinyin-pro";
+import { locationOptions } from "./fuseOptions";
 
 export type Location = {
   id: string;
   name: string;
   location: string;
+  namePinyin: string;
+  namePinyinInitials: string;
+};
+
+export type Date = {
+  id: string;
+  name: string;
 };
 
 export type Route = {
@@ -24,8 +34,10 @@ export type ButtonPosition = {
 
 interface LocationSlice {
   locations: Location[];
-  AddLocation: (location: string) => void;
+  AddLocation: (location: string, name: string, id: string) => void;
   RemoveLocation: (location: string) => void;
+  SearchLocationsByName: (searchTerm: string) => Location[];
+  GetLocationById: (id: string) => Location | undefined;
 }
 
 interface PlaceSlice {
@@ -77,32 +89,87 @@ export const defaultInitState = {
 
 const createLocationSlice: StateCreator<Store, [], [], LocationSlice> = (
   set,
+  get,
 ) => ({
   locations: defaultInitState.locations,
-  AddLocation: (location: string) =>
+  AddLocation: (location: string, name: string, id: string) =>
     set((state) => {
-      const locationId = location.split(",")[0] + "-" + location.split(",")[1];
+      // const locationId = location.split(",")[0] + "-" + location.split(",")[1];
+      const locationId = id;
+      const exists = state.locations.some(
+        (loc) => loc.location === location && loc.name === name,
+      );
+      if (exists) {
+        console.warn("Location exists", { name, location });
+        return {};
+      }
+
+      let namePinyin = "";
+      let namePinyinInitials = "";
+
+      const chineseChars = name.match(/[\u4e00-\u9fa5]/g);
+
+      // Only consider Chinese? Not considering a mix of Chinese and English?
+      if (chineseChars && chineseChars.length > 0) {
+        const chinesePart = chineseChars.join("");
+        namePinyin = pinyin(chinesePart, {
+          pattern: "pinyin",
+          toneType: "none",
+          // nonZh: "consecutive",
+        }).replace(/\s/g, "");
+        namePinyinInitials = pinyin(chinesePart, {
+          pattern: "first",
+          toneType: "none",
+          // nonZh: "consecutive",
+        }).replace(/\s/g, "");
+      }
+      // If there are no Chinese characters, `namePinyin` and `namePinyinInitials` remain as empty string
+      const newLocation: Location = {
+        id: locationId,
+        name: name,
+        location: location,
+        namePinyin: namePinyin,
+        namePinyinInitials: namePinyinInitials,
+      };
       return {
-        locations: [
-          ...state.locations,
-          { id: locationId, name: "", location: location },
-        ],
+        locations: [...state.locations, newLocation],
       };
     }),
-  RemoveLocation: (location: string) =>
+  RemoveLocation: (id: string) =>
     set((state) => ({
       locations: state.locations.filter((loc) => {
         // const locationId =
         //   location.location.split(",")[0] +
         //   "-" +
         //   location.location.split(",")[1];
-        return loc.location !== location;
+        return loc.id !== id;
       }),
       // routes: state.routes.map((route) => ({
       //   ...route,
       //   locations: route.locations.filter((locId) => locId !== id),
       // })),
     })),
+  SearchLocationsByName: (searchTerm: string): Location[] => {
+    const currentLocations = get().locations;
+
+    if (!searchTerm || searchTerm.trim() === "") {
+      return currentLocations;
+    }
+
+    // Each search creates a new instance of Fuse, no need to implement caching for the time being
+    const fuse = new Fuse(currentLocations, locationOptions);
+    const results = fuse.search(searchTerm);
+
+    return results.map((result) => result.item);
+  },
+  GetLocationById: (id: string): Location | undefined => {
+    const state = get();
+
+    return state.locations.find((loc) => {
+      const locId = loc.id;
+      return id === locId;
+    });
+  },
 });
 
 const createPlaceSlice: StateCreator<Store, [], [], PlaceSlice> = (
@@ -117,8 +184,8 @@ const createPlaceSlice: StateCreator<Store, [], [], PlaceSlice> = (
   RemovePlace: (id: string) =>
     set((state) => ({
       places: state.places.filter((place) => {
-        const placeId =
-          place.location.split(",")[0] + "-" + place.location.split(",")[1];
+        // const placeId = place.location.split(",")[0] + "-" + place.location.split(",")[1];
+        const placeId = place.id;
         return placeId !== id;
       }),
       routes: state.routes.map((route) => ({
@@ -130,8 +197,8 @@ const createPlaceSlice: StateCreator<Store, [], [], PlaceSlice> = (
     const state = get();
 
     return state.places.find((place) => {
-      const placeId =
-        place.location.split(",")[0] + "-" + place.location.split(",")[1];
+      // const placeId = place.location.split(",")[0] + "-" + place.location.split(",")[1];
+      const placeId = place.id;
       return id === placeId;
     });
   },

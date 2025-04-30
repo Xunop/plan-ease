@@ -37,6 +37,8 @@ import Suggestion from "./Suggestion";
 import { PlanItem } from "./PlanItem";
 import PlanList from "./PlanList";
 import DateNode from "./Date/Date";
+import { Slash } from "./Slash/Slash";
+import CommandSuggestion from "./Slash/CommandSuggestion";
 
 export const ExtensionKit = ({
   ydoc,
@@ -78,6 +80,13 @@ export const ExtensionKit = ({
     PlanList,
     PlanItem,
     DateNode,
+    Slash.configure({
+        suggestion: CommandSuggestion,
+    }),
+    // Mention
+    Mention.configure({
+      suggestion: Suggestion,
+    }),
 
     // Heading.configure({
     //   levels: [1, 2, 3],
@@ -96,10 +105,6 @@ export const ExtensionKit = ({
     //   placeholder: "Write somthing ...",
     // }),
 
-    // Mention
-    Mention.configure({
-      suggestion: Suggestion,
-    }),
 
     StarterKit.configure({
       document: false,

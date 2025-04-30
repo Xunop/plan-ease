@@ -10,7 +10,7 @@ import { Editor } from "@tiptap/core";
 import { parseDateString, dateObjectToDateString } from "./utils";
 import { DatePickerWrapper } from "./DatePicker";
 
-import "./DateNodeStyles.scss"; // We'll create this CSS file
+import "./DateNodeStyles.scss";
 import { cn } from "@/lib/utils";
 
 // Helper type for Tiptap editor instance within props
@@ -38,6 +38,11 @@ export const DateComponent: React.FC<DateNodeViewProps> = ({
 
   // Store selection offset
   const selectionRef = useRef<{ start: number; end: number } | null>(null);
+
+  // Store date
+  useEffect(() => {
+    return () => {};
+  }, []);
 
   // Focus and set cursor to end on initial edit mode entry
   useEffect(() => {
@@ -80,7 +85,6 @@ export const DateComponent: React.FC<DateNodeViewProps> = ({
       const textToParse =
         typeof newDisplayText !== "undefined" ? newDisplayText : inputValue;
       const parsed = parseDateString(textToParse);
-      console.log(`text: ${textToParse}, parsed: ${parsed}`);
 
       // If input is empty or invalid after editing, maybe delete the node? Or keep it?
       // Option 1: Keep it with empty display / null value
