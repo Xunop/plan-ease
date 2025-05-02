@@ -7,19 +7,11 @@ import React, {
   useCallback,
   forwardRef,
 } from "react";
-import { debounce, throttle } from "lodash"; // Import debounce
-import {
-  CommandContext,
-  CommandResult,
-  CommandSuggestion,
-  ResolvedOptions,
-} from "./types"; // Adjust paths
-import { commands } from "./commands"; // Adjust path
-// import { resolveImplicitOptions } from "./commandUtils"; // Adjust path
+import { throttle } from "lodash";
+import { CommandSuggestion } from "./types";
 import { Editor, Range } from "@tiptap/core";
 import { Popover, PopoverContent } from "@/components/ui/popover";
-import { getStore } from "@/providers/location-store-provider";
-import "./List.scss";
+import "./list.scss";
 
 export interface CmdSugRef {
   handleShow: () => void;
@@ -33,7 +25,7 @@ interface CommandSugContentProps {
   editor: Editor;
   range: Range; // Need the range for context position
   decorationNode: Element;
-  command: (args: { commandName: string }) => void; // Pass command name on selection
+  command: (args: { commandSug: CommandSuggestion }) => void; // Pass command name on selection
 }
 
 // Inside the component:
@@ -178,8 +170,9 @@ export const CommandSugContent = forwardRef<CmdSugRef, CommandSugContentProps>(
     const selectItem = (index: number) => {
       const selected = suggestionItems[index];
       if (selected) {
-        props.command({ commandName: selected.command.name }); // Pass command name back
+        props.command({ commandSug: selected }); // Pass command name back
       }
+      console.log("end");
     };
 
     const handleOpenAutoFocus = () => {
@@ -216,22 +209,17 @@ export const CommandSugContent = forwardRef<CmdSugRef, CommandSugContentProps>(
                   className={index === selectedIndex ? "is-selected" : ""}
                   key={item.id}
                   onClick={() => selectItem(index)}
-                  // Keep the full displayText in the title for tooltips/accessibility
                   title={item.displayText}
                 >
-                  {/* Display Command Prefix (Assuming segments cover the part *after* the prefix) */}
                   <span className="cmd-prefix">{item.commandPrefix}</span>
 
                   {/* Render based on segments if definition and segments exist */}
                   {
                     item.baseDefinition?.segments
-                      ? // Iterate through the segments defined in the command's format
-                        item.baseDefinition.segments.map(
+                      ? item.baseDefinition.segments.map(
                           (segment, segIndex) => {
                             if (segment.type === "literal") {
-                              // Use segment index and type/name for a unique React key
                               const segmentKey = `${segIndex}-lit`;
-                              // Render literal text directly (might contain spaces)
                               return (
                                 <span key={segmentKey} className="cmd-literal">
                                   {segment.value}
@@ -239,23 +227,20 @@ export const CommandSugContent = forwardRef<CmdSugRef, CommandSugContentProps>(
                               );
                             } else if (segment.type === "option") {
                               const segmentKey = `${segIndex}-opt-${segment.name}`;
-                              // Find the actual value for this option placeholder
-                              // from the specific suggestion's options map.
-                              const optionValue = item.options[segment.name];
+                              const optionValue = item.displayOptions
+                                ? item.displayOptions[segment.name]
+                                : item.options[segment.name];
                               return (
                                 <span
                                   key={segmentKey}
-                                  // Add both a general class and a specific class for styling
                                   className={`cmd-option cmd-option-${segment.name}`}
                                 >
-                                  {/* Display the value if found, otherwise show the placeholder name */}
                                   {optionValue !== undefined
                                     ? optionValue
                                     : `{${segment.name}}`}
                                 </span>
                               );
                             }
-                            // Should ideally not happen with valid segment types
                             return null;
                           },
                         )
@@ -265,8 +250,6 @@ export const CommandSugContent = forwardRef<CmdSugRef, CommandSugContentProps>(
                         Object.entries(item.options).map(([key, value]) => (
                           <React.Fragment key={`fallback-${key}`}>
                             {" "}
-                            {/* Add space before each fallback option */}
-                            {/* Use a distinct class for fallback options if needed */}
                             <span className={`option-fallback option-${key}`}>
                               {value}
                             </span>
@@ -278,14 +261,6 @@ export const CommandSugContent = forwardRef<CmdSugRef, CommandSugContentProps>(
                     //  {' '}{item.displayText.substring(item.commandPrefix.length)}
                     // </span>
                   }
-
-                  {/* --- Original commented out preview logic remains untouched --- */}
-                  {/*
-        <small>
-          {item.command.description || item.command.format}
-        </small>
-        ... etc ...
-        */}
                 </button>
               ))
             ) : (

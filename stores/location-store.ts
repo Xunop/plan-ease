@@ -14,7 +14,7 @@ export type Location = {
 
 export type Date = {
   id: string;
-  name: string;
+  date: string;
 };
 
 export type Route = {
@@ -35,16 +35,24 @@ export type ButtonPosition = {
 interface LocationSlice {
   locations: Location[];
   AddLocation: (location: string, name: string, id: string) => void;
-  RemoveLocation: (location: string) => void;
+  RemoveLocation: (id: string) => void;
   SearchLocationsByName: (searchTerm: string) => Location[];
   GetLocationById: (id: string) => Location | undefined;
+}
+
+interface DateSlice {
+  dates: Date[];
+  AddDate: (id: string, date: string) => void;
+  RemoveDate: (id: string) => void;
+  GetDateById: (id: string) => Date | undefined;
 }
 
 interface PlaceSlice {
   places: AmapPlace[];
   AddPlace: (place: AmapPlace) => void;
   RemovePlace: (id: string) => void;
-  GetPlace: (id: string) => void;
+  GetPlaceById: (id: string) => void;
+  GetPlaceByLoc: (loc: string) => AmapPlace | undefined;
 }
 
 interface RouteSlice {
@@ -71,11 +79,16 @@ interface EditorButtonList {
   }: ButtonPosition) => void;
 }
 
-export type Store = LocationSlice & PlaceSlice & RouteSlice & EditorButtonList;
+export type Store = LocationSlice &
+  PlaceSlice &
+  RouteSlice &
+  DateSlice &
+  EditorButtonList;
 
 export const defaultInitState = {
   locations: [] as Location[],
   places: [] as AmapPlace[],
+  dates: [] as Date[],
   routes: [] as Route[],
   buttonListOpen: false,
   buttonListPos: {
@@ -172,6 +185,35 @@ const createLocationSlice: StateCreator<Store, [], [], LocationSlice> = (
   },
 });
 
+const createDateslice: StateCreator<Store, [], [], DateSlice> = (set, get) => ({
+  dates: defaultInitState.dates,
+  AddDate: (id: string, date: string) =>
+    set((state) => {
+      const newDate: Date = {
+        id: id,
+        date: date,
+      };
+
+      return {
+        dates: [...state.dates, newDate],
+      };
+    }),
+  RemoveDate: (id: string) =>
+    set((state) => ({
+      dates: state.dates.filter((d) => {
+        return d.id !== id;
+      }),
+    })),
+  GetDateById: (id: string): Date | undefined => {
+    const state = get();
+
+    return state.dates.find((d) => {
+      const dateId = d.id;
+      return dateId === id;
+    });
+  },
+});
+
 const createPlaceSlice: StateCreator<Store, [], [], PlaceSlice> = (
   set,
   get,
@@ -193,13 +235,22 @@ const createPlaceSlice: StateCreator<Store, [], [], PlaceSlice> = (
         locations: route.locations.filter((locId) => locId !== id),
       })),
     })),
-  GetPlace: (id: string): AmapPlace | undefined => {
+  GetPlaceById: (id: string): AmapPlace | undefined => {
     const state = get();
 
     return state.places.find((place) => {
       // const placeId = place.location.split(",")[0] + "-" + place.location.split(",")[1];
       const placeId = place.id;
       return id === placeId;
+    });
+  },
+  GetPlaceByLoc: (loc: string): AmapPlace | undefined => {
+    const state = get();
+
+    return state.places.find((place) => {
+      // const placeId = place.location.split(",")[0] + "-" + place.location.split(",")[1];
+      const placeId = place.location;
+      return loc === placeId;
     });
   },
 });
@@ -286,5 +337,6 @@ export const createBoundStore = () => {
     ...createRouteSlice(...a),
     ...createEditorButtonList(...a),
     ...createLocationSlice(...a),
+    ...createDateslice(...a),
   }));
 };

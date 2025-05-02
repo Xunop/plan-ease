@@ -174,6 +174,21 @@ export interface AmapDistrict {
   adcode: string; // District code
 }
 
+export interface AmapWeather {
+  city: string;
+  reporttime: string;
+  casts: Forecast[];
+}
+
+export interface Forecast {
+  date: string;
+  week: string;
+  dayweather: string;
+  nightweather: string;
+  daytemp: string;
+  nighttemp: string;
+}
+
 // export const convertAmapPlace = {
 //   // Convert AmapPlaceDetail to AmapPlace
 //   toAmapPlace(detail: AmapPlaceDetail): AmapPlace {

@@ -1,151 +1,97 @@
-import { CommandSuggestion, QueryState, initialQueryState } from "./types";
-import { parseInputForScoring } from "./commandUtils";
+import Fuse, { IFuseOptions } from 'fuse.js';
+// ****** END OF MANUAL IMPORT ******
+
+import {
+    CommandSuggestion,
+    QueryState,
+    initialQueryState
+} from './types';
+// Note: commandUtils may no longer be needed here
+
+// --- Fuse.js Options ---
+// Define how Fuse should search within the CommandSuggestion objects
+const fuseOptions: IFuseOptions<CommandSuggestion> = {
+  // `includeScore` is essential to get similarity scores
+  includeScore: true,
+  // `threshold` controls fuzziness (0=exact, 1=match anything). Adjust as needed.
+  threshold: 0.4, // Start with a moderate threshold
+  // `location` and `distance` control where matches are expected (0 = start, large distance = anywhere)
+  location: 0,
+  distance: 100, // Allow matches far apart within the string
+  // `minMatchCharLength`: Minimum pattern length to consider a match
+  minMatchCharLength: 2, // Ignore very short partial matches?
+  // `ignoreLocation`: Set to true to match anywhere in the string, false to prioritize matches at the start. Let's try false.
+  ignoreLocation: false,
+  // `displayText` is likely the most important key.
+  keys: [
+     { name: 'displayText', weight: 0.8 }, // Heavily weight the pre-formatted text
+     { name: 'commandPrefix', weight: 0.4 }, // Also consider the prefix itself
+     // Optional: Search within specific option values if needed
+     // { name: 'options.address', weight: 0.5 },
+     // { name: 'options.date', weight: 0.3 },
+  ]
+};
+
 
 /**
- * Processes user input to filter and rank a list of command suggestions.
+ * Processes user input to filter and rank a list of command suggestions using Fuse.js.
  * @param inputText The user's current input string.
  * @param allSuggestions The master list of CommandSuggestion objects.
  * @returns A QueryState reflecting the filtered and ranked suggestions.
  */
 export function processCommandQuery(
-  inputText: string,
-  allSuggestions: CommandSuggestion[],
-): QueryState {
-  const trimmedInput = inputText.trim();
-  const inputLower = trimmedInput.toLowerCase();
+    inputText: string,
+    allSuggestions: CommandSuggestion[]): QueryState { // Becomes synchronous
 
-  let filteredRankedSuggestions: CommandSuggestion[] = [];
+    const trimmedInput = inputText.trim();
+    let rankedSuggestions: CommandSuggestion[] = [];
 
-  // --- Handle Initial States ---
-  if (!inputLower) return { ...initialQueryState, inputText };
-  if (inputLower === "/") {
-    filteredRankedSuggestions = allSuggestions.map((s) => ({
-      ...s,
-      matchScore: 1,
-    }));
-    filteredRankedSuggestions.sort((a, b) =>
-      a.displayText.localeCompare(b.displayText),
-    );
+    // --- Handle Initial/Special States ---
+    if (!trimmedInput) {
+        return { ...initialQueryState, inputText }; // Empty input -> empty suggestions
+    }
+    if (trimmedInput === '/') {
+        // Return all suggestions, sorted alphabetically, no Fuse score needed
+        rankedSuggestions = [...allSuggestions].sort((a, b) => a.displayText.localeCompare(b.displayText));
+        // Add a dummy score if needed downstream, or handle absence of score
+        rankedSuggestions = rankedSuggestions.map(s => ({ ...s, matchScore: 1.0 })); // Use 1.0 for display? Or 0? Fuse score is 0=best.
+        return { ...initialQueryState, inputText, suggestions: rankedSuggestions };
+    }
+    if (!trimmedInput.startsWith('/')) {
+         return { ...initialQueryState, inputText }; // Ignore if not starting with /
+    }
+
+    // --- Use Fuse.js for Filtering and Ranking ---
+
+    // 1. Initialize Fuse with the suggestions list and options
+    //    For performance, consider creating this Fuse instance only once outside this function
+    //    if `allSuggestions` doesn't change often.
+    const fuse = new (Fuse as any)(allSuggestions, fuseOptions); // Use 'as any' if Fuse type isn't directly available
+
+    // 2. Perform the search using the trimmed input as the pattern
+    const fuseResult = fuse.search(trimmedInput);
+
+    // 3. Map Fuse results to our CommandSuggestion format, potentially transforming the score
+    rankedSuggestions = fuseResult.map((result: { item: CommandSuggestion; score: number }) => {
+        // Fuse score: 0 = perfect match, 1 = worst match.
+        // We can convert this to "higher is better" if needed, or keep Fuse's score.
+        // Let's convert to higher-is-better (1 - score) for consistency with previous attempts.
+        const higherIsBetterScore = 1 - result.score;
+        return {
+            ...result.item,
+            matchScore: parseFloat(higherIsBetterScore.toFixed(4)) // Add score to the item
+        };
+    });
+
+    // Fuse already returns sorted results by score (best first)
+
+
+    // --- Return Final State ---
     return {
-      ...initialQueryState,
-      inputText,
-      suggestions: filteredRankedSuggestions,
+        inputText,
+        suggestions: rankedSuggestions,
+        isLoading: false,
+        result: null,
+        error: null,
     };
-  }
-  if (!inputLower.startsWith("/")) return { ...initialQueryState, inputText };
-
-  // --- Filtering and Scoring ---
-  for (const suggestion of allSuggestions) {
-    let score = 0;
-    const suggestionPrefixLower = suggestion.commandPrefix.toLowerCase();
-
-    const firstSpaceIndex = trimmedInput.indexOf(" ");
-    const potentialCmdInputPrefix =
-      inputLower === "/"
-        ? "/"
-        : firstSpaceIndex === -1
-          ? inputLower
-          : inputLower.substring(0, firstSpaceIndex);
-
-    // console.log(`suggestionPrefixLower: ${suggestionPrefixLower}, potentialCmdInputPrefix: ${potentialCmdInputPrefix}`)
-    // 1. Prefix Match
-    if (!suggestionPrefixLower.startsWith(potentialCmdInputPrefix)) {
-      continue; // Skip if command prefix doesn't match input start
-    }
-    score += 10;
-
-    // 2. Structural Content Matching
-    const inputContent = trimmedInput.substring(
-      suggestion.commandPrefix.length,
-    );
-    const segments = suggestion.baseDefinition?.segments;
-    const optionOrder = suggestion.baseDefinition?.optionOrder;
-
-    if (!segments || !optionOrder) {
-      // Fallback for commands without structure - simple contains check
-      if (
-        inputContent.trim() &&
-        !suggestion.displayText
-          .toLowerCase()
-          .substring(suggestionPrefixLower.length)
-          .includes(inputContent.toLowerCase())
-      ) {
-        score = 0; // Disqualify if input content isn't even contained
-      } else if (!inputContent.trim()) {
-        score += 5;
-      } // Matches prefix only
-    } else {
-      // --- Use the structured parser ---
-      const parseResult = parseInputForScoring(
-        inputContent,
-        segments,
-        optionOrder,
-      );
-
-      // --- Refined Disqualification Check ---
-      // Disqualify only if input has content, matches zero segments, AND didn't even partially match the next literal
-      if (
-        parseResult.segmentsMatched === 0 &&
-        inputContent.trim() &&
-        !parseResult.partialLiteralMatch
-      ) {
-        score = 0;
-      } else {
-        // --- Calculate Score ---
-        // Base score for fully matched segments
-        score += parseResult.segmentsMatched * 5;
-
-        // Bonus if the input ended by partially matching the next expected literal
-        if (parseResult.partialLiteralMatch) {
-          // Slightly higher bonus if it was the *first* segment that was partial
-          score += parseResult.segmentsMatched === 0 ? 5 : 3;
-        }
-
-        // Bonus for completing the *entire* command structure
-        if (parseResult.isCompleteStructureMatch) {
-          score += 15;
-        }
-
-        // Compare Extracted Input Options vs Suggestion Options
-        let optionMatchScore = 0;
-        for (const optionName in parseResult.extractedInputOptions) {
-          const inputValue = parseResult.extractedInputOptions[optionName];
-          const suggestionValue = suggestion.options[optionName];
-
-          if (inputValue && suggestionValue) {
-            const inputValueLower = inputValue.toLowerCase();
-            const suggestionValueLower = suggestionValue.toLowerCase();
-
-            if (inputValueLower === suggestionValueLower) {
-              optionMatchScore += 20; // Exact match
-            } else if (suggestionValueLower.startsWith(inputValueLower)) {
-              optionMatchScore += 10; // Suggestion starts with Input
-            } else if (inputValueLower.startsWith(suggestionValueLower)) {
-              optionMatchScore += 8; // Input starts with Suggestion
-            }
-          }
-        }
-        score += optionMatchScore;
-      }
-    }
-
-    // 3. Add to list if score is positive
-    if (score > 0) {
-      filteredRankedSuggestions.push({ ...suggestion, matchScore: score });
-    }
-  }
-
-  // --- Sorting ---
-  filteredRankedSuggestions.sort(
-    (a, b) => (b.matchScore ?? 0) - (a.matchScore ?? 0),
-  );
-
-  // --- Return Final State ---
-  return {
-    inputText,
-    suggestions: filteredRankedSuggestions,
-    isLoading: false,
-    result: null,
-    error: null,
-  };
 }

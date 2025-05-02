@@ -1,24 +1,42 @@
 import { CommandDefinition, CommandSuggestion } from "./types";
 import { commands as baseCommands } from "./commands"; // Import base definitions
+import { getStore } from "@/providers/location-store-provider";
+import { AmapPlace } from "@/lib/api/gaode/types";
 
-// --- Sample Data ---
-const sampleAddresses = ["London", "Paris", "Singapore", "New York", "Tokyo", "南京市"];
-const sampleDates = ["2025-05-10", "2025-05-11", "Tomorrow", "Next Monday"];
 const sampleOrigins = ["London", "Singapore", "Home"];
 const sampleDestinations = ["Paris", "Work", "Airport", "KL"];
 
 // Helper to format a suggestion's display text based on definition and options
+// Prioritizes displayOptions for filling placeholders in the format string.
 function formatDisplayText(
   definition: CommandDefinition,
-  options: Record<string, string>,
+  actionOptions: Record<string, string>, // Renamed for clarity
+  displayOptions?: Record<string, string>,
 ): string {
   let text = definition.format;
-  for (const key in options) {
-    text = text.replace(`{${key}}`, options[key] || `{${key}}`); // Replace or keep placeholder if option missing
+  // Iterate through all possible keys from both option sets
+  const allKeys = new Set([
+    ...Object.keys(actionOptions),
+    ...Object.keys(displayOptions ?? {}),
+  ]);
+
+  for (const key of allKeys) {
+    const placeholder = `{${key}}`;
+    if (text.includes(placeholder)) {
+      // Use display value if available, otherwise use action value
+      const valueToDisplay = displayOptions?.[key] ?? actionOptions[key];
+      // Ensure we have a string value to substitute
+      const substitution =
+        valueToDisplay !== undefined ? String(valueToDisplay) : placeholder;
+      text = text.replace(placeholder, substitution);
+    }
   }
-  // Clean up remaining placeholders if any option was missing in the provided map
-  text = text.replace(/\{[a-zA-Z0-9_]+\}/g, ""); // Remove unfilled placeholders
-  text = text.replace(/\s{2,}/g, " ").trim(); // Clean up extra spaces
+
+  // Clean up any remaining, unfilled placeholders and extra whitespace
+  text = text
+    .replace(/\{[a-zA-Z0-9_]+\}/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
   return text;
 }
 
@@ -27,6 +45,8 @@ let suggestionIdCounter = 0;
 
 export function generateInitialSuggestions(): CommandSuggestion[] {
   const suggestions: CommandSuggestion[] = [];
+  const store = getStore();
+  const { dates, locations, GetPlaceByLoc } = store.getState();
 
   for (const commandDef of baseCommands) {
     if (!commandDef.optionOrder) {
@@ -46,15 +66,29 @@ export function generateInitialSuggestions(): CommandSuggestion[] {
 
     // Generate suggestions based on command type
     if (commandDef.name === "Weather") {
-      for (const address of sampleAddresses) {
-        for (const date of sampleDates) {
-          const options = { address, date };
+      console.log("Weather init", locations, dates);
+      for (const loc of locations) {
+        for (const d of dates) {
+          const address = loc.location;
+          const place= GetPlaceByLoc(address)
+
+          console.log("place: ", place)
+
+          const date = d.date;
+          if (!place) {
+              console.warn("Place is undefined")
+              continue
+          }
+
+          const options = { address: place.adcode, date };
+          const displayOpts = { address: loc.name, date: date };
           suggestions.push({
             id: `sugg-${suggestionIdCounter++}`,
             baseCommandName: commandDef.name,
             commandPrefix: commandDef.commandPrefix,
             options: options,
-            displayText: formatDisplayText(commandDef, options),
+            displayOptions: displayOpts,
+            displayText: formatDisplayText(commandDef, options, displayOpts),
             baseDefinition: commandDef,
           });
         }
@@ -82,7 +116,23 @@ export function generateInitialSuggestions(): CommandSuggestion[] {
   return suggestions;
 }
 
+/**
+ * Regenerates the command suggestions based on the current state
+ * (e.g., from the location store) and updates the exported
+ * `initialSuggestions` variable.
+ */
+export function updateInitialSuggestions(): void {
+  console.log("Updating initial suggestions...");
+  initialSuggestions = generateInitialSuggestions();
+  console.log(
+    "Initial suggestions updated. New count:",
+    initialSuggestions.length,
+  );
+  // Optional: Log a few examples of the new suggestions
+  console.log("New Suggestions Sample:", initialSuggestions.slice(0, 5));
+}
+
 // Generate the list on load (or call this function when needed)
-export const initialSuggestions = generateInitialSuggestions();
+export let initialSuggestions = generateInitialSuggestions();
 
 // console.log("Generated Suggestions:", initialSuggestions.slice(0, 5)); // Log a few examples

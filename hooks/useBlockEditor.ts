@@ -24,6 +24,17 @@ export const useBlockEditor = ({
   const [collabState, setCollabState] = useState<WebSocketStatus>(
     provider ? WebSocketStatus.Connecting : WebSocketStatus.Disconnected,
   );
+      const minimalAttrs = { commandName: "Weather", status: 'success', resultDisplay: 'Minimal Test' };
+      const contentToInsert = [
+        // {
+        //   type: "formulas",
+        //   attrs: minimalAttrs,
+        // },
+        {
+          type: "text",
+          text: " ", // Add space immediately after
+        },
+      ];
   const editor = useEditor({
     ...editorOptions,
     // FIXME: In client side, we should set to true, but tiptap will throw ssr error

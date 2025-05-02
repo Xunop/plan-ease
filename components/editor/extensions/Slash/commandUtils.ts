@@ -1,15 +1,7 @@
-import { Content, Editor } from "@tiptap/core";
-import { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import {
-  CommandContext,
   CommandDefinition,
-  ResolvedOptions,
-  QueryState,
-  initialQueryState,
-  CommandResult,
   CommandSegment,
 } from "./types";
-import { useBoundStore } from "@/providers/location-store-provider";
 
 /** Escapes special characters in a string for use in a RegExp. */
 function escapeRegex(text: string): string {

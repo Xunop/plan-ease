@@ -42,4 +42,34 @@
       // background-color: var(--gray-1)
     }
   }
+
+  > span {
+     display: inline;
+     margin-right: 0.25em;
+
+     &:last-child {
+       margin-right: 0;
+     }
+  }
+
+
+  .cmd-prefix {
+    color: #333;
+    font-weight: 700;
+  }
+
+  .cmd-literal {
+    color: #888;
+  }
+
+  .cmd-option {
+    color: #5c7cfa;
+    font-weight: 700;
+  }
+
+  .item {
+     padding: 0.375rem 0.5rem;
+     color: #666;
+     font-style: italic;
+  }
 }

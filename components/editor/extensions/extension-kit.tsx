@@ -39,6 +39,7 @@ import PlanList from "./PlanList";
 import DateNode from "./Date/Date";
 import { Slash } from "./Slash/Slash";
 import CommandSuggestion from "./Slash/CommandSuggestion";
+import { FormulasExtension } from "./Formulas/Formulas";
 
 export const ExtensionKit = ({
   ydoc,
@@ -48,28 +49,30 @@ export const ExtensionKit = ({
   provider?: HocuspocusProvider | null | undefined;
 }) => {
   const extensions: AnyExtension[] = [
+    // Must need
     Document,
     Text,
+
     CharacterCount,
 
-    Bold,
-    Italic,
-    Strike,
+    // Bold,
+    // Italic,
+    // Strike,
     Underline,
 
     Focus,
 
     // Node
-    ListItem,
-    BulletList.extend({
-      addKeyboardShortcuts() {
-        return {
-          Enter: ({ editor }) => {
-            return false;
-          },
-        };
-      },
-    }),
+    // ListItem,
+    // BulletList.extend({
+    //   addKeyboardShortcuts() {
+    //     return {
+    //       Enter: ({ editor }) => {
+    //         return false;
+    //       },
+    //     };
+    //   },
+    // }),
     OrderedList,
     TaskList,
     TaskItem.configure({
@@ -77,16 +80,17 @@ export const ExtensionKit = ({
     }),
 
     // DataRoute,
-    PlanList,
-    PlanItem,
+    // PlanList,
+    // PlanItem,
     DateNode,
     Slash.configure({
         suggestion: CommandSuggestion,
     }),
-    // Mention
+    // // Mention
     Mention.configure({
       suggestion: Suggestion,
     }),
+    FormulasExtension,
 
     // Heading.configure({
     //   levels: [1, 2, 3],
@@ -101,11 +105,6 @@ export const ExtensionKit = ({
       types: ["heading", "paragraph"],
     }),
 
-    // Placeholder.configure({
-    //   placeholder: "Write somthing ...",
-    // }),
-
-
     StarterKit.configure({
       document: false,
       dropcursor: false,
@@ -114,6 +113,7 @@ export const ExtensionKit = ({
       blockquote: false,
       codeBlock: false,
       orderedList: false,
+      history: false,
     }),
   ];
 

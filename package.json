@@ -105,6 +105,7 @@
       "sharp"
     ],
     "ignoredBuiltDependencies": [
+      "esbuild",
       "sqlite3"
     ]
   }

@@ -12,6 +12,7 @@ import { DatePickerWrapper } from "./DatePicker";
 
 import "./DateNodeStyles.scss";
 import { cn } from "@/lib/utils";
+import { getStore } from "@/providers/location-store-provider";
 
 // Helper type for Tiptap editor instance within props
 interface DateNodeViewProps extends NodeViewProps {
@@ -25,7 +26,7 @@ export const DateComponent: React.FC<DateNodeViewProps> = ({
   getPos, // Function to get the node's current position
   deleteNode, // Function to delete the node
 }) => {
-  const { dateValue, displayText, isEditing } = node.attrs;
+  const { dateId, dateValue, displayText, isEditing } = node.attrs;
 
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [inputValue, setInputValue] = useState<string>(displayText);
@@ -39,12 +40,35 @@ export const DateComponent: React.FC<DateNodeViewProps> = ({
   // Store selection offset
   const selectionRef = useRef<{ start: number; end: number } | null>(null);
 
-  // Store date
+  // Centralized Date Storage/Logging Logic
+  const previousDateValueRef = useRef<string | null | undefined>(dateValue);
+
+  const store = getStore();
+  const { dates, GetDateById, AddDate, RemoveDate } = store.getState();
+
   useEffect(() => {
-    return () => {};
+    const currentDateValue = node.attrs.dateValue;
+    const previousDateValue = previousDateValueRef.current;
+
+    if (currentDateValue !== previousDateValue) {
+      // console.log("Update date value", currentDateValue, dateId);
+      AddDate(dateId, currentDateValue);
+      // Update the ref for the next render cycle
+      previousDateValueRef.current = currentDateValue;
+    }
+  }, [dateValue, dateId, AddDate, RemoveDate]);
+
+  useEffect(() => {
+    if (dateValue) {
+      // console.log(`Init Date Value: ${dateValue} ${dateId}`)
+      AddDate(dateId, dateValue);
+    }
+    return () => {
+      // console.log(`Remove Date Value: ${dateValue} ${dateId}`);
+      RemoveDate(dateId);
+    };
   }, []);
 
-  // Focus and set cursor to end on initial edit mode entry
   useEffect(() => {
     if (isEditing && inputRef.current) {
       // Small timeout often helps ensure the element is fully ready for focus
@@ -79,6 +103,43 @@ export const DateComponent: React.FC<DateNodeViewProps> = ({
     }
   }, [displayText, isEditing]);
 
+  const finalizeAndAddSpace = useCallback(
+    (attrsToUpdate: Partial<typeof node.attrs>) => {
+      updateAttributes(attrsToUpdate);
+      setIsPickerOpen(false); // Ensure picker is closed
+
+      // Use setTimeout to allow the updateAttributes transaction to complete
+      // and the node's state (isEditing=false) to render before moving focus/inserting space
+      setTimeout(() => {
+        if (typeof getPos === "function" && editor.isEditable) {
+          const pos = getPos();
+          if (typeof pos === "number") {
+            // Calculate position immediately after the node
+            const endPos = pos + node.nodeSize;
+
+            // Check if the character immediately following the node is already a space
+            // Use empty string '' as block separator to check only immediate character
+            const nextChar = editor.state.doc.textBetween(
+              endPos,
+              endPos + 1,
+              "",
+            );
+
+            if (nextChar !== " ") {
+              // If no space, insert one and focus after it
+              console.log("insert space");
+              editor.chain().focus(endPos).insertContent(" ").run();
+            } else {
+              // If space exists, just move focus after the existing space
+              editor.commands.focus(endPos + 1);
+            }
+          }
+        }
+      }, 0); // Timeout 0 pushes execution to after current stack/render
+    },
+    [updateAttributes, getPos, editor, node.nodeSize],
+  );
+
   // Finalization Logic
   const finalizeEdits = useCallback(
     (newDisplayText?: string) => {
@@ -88,41 +149,24 @@ export const DateComponent: React.FC<DateNodeViewProps> = ({
 
       // If input is empty or invalid after editing, maybe delete the node? Or keep it?
       // Option 1: Keep it with empty display / null value
-      // const finalDisplayText = textToParse;
-      // const finalDateValue = parsed;
-
-      // Option 2: Delete node if input is invalid/empty (might be more user-friendly)
-      if (!textToParse.trim() || !parsed) {
-        deleteNode();
-        return;
-      }
       const finalDisplayText = textToParse;
       const finalDateValue = parsed;
 
-      updateAttributes({
+      // Option 2: Delete node if input is invalid/empty (might be more user-friendly)
+      // if (!textToParse.trim() || !parsed) {
+      //   deleteNode();
+      //   return;
+      // }
+      // const finalDisplayText = textToParse;
+      // const finalDateValue = parsed;
+
+      finalizeAndAddSpace({
         dateValue: finalDateValue,
         displayText: finalDisplayText,
         isEditing: false,
       });
-      setIsPickerOpen(false); // Ensure picker is closed
-
-      // Optional: Move cursor after the node
-      // Check if getPos is a function before calling
-      if (typeof getPos === "function") {
-        const pos = getPos();
-        if (typeof pos === "number") {
-          editor.commands.focus(pos + node.nodeSize);
-        }
-      }
     },
-    [
-      inputValue,
-      updateAttributes,
-      editor.commands,
-      getPos,
-      node.nodeSize,
-      deleteNode,
-    ],
+    [inputValue, deleteNode, finalizeAndAddSpace],
   );
 
   // This is extracted to be callable from both onInput and onCompositionEnd
@@ -290,14 +334,12 @@ export const DateComponent: React.FC<DateNodeViewProps> = ({
           onKeyDown={handleKeyDown}
           onCompositionStart={handleCompositionStart}
           onCompositionEnd={handleCompositionEnd}
+          date-id={dateId}
+          date-date={dateValue}
           // We handle blur on the wrapper now
         >
           {inputValue}
         </span>
-        {/* NodeViewContent allows Tiptap to render child nodes if needed,
-            but for an atom node managing its own content, it might not be necessary
-            or could interfere. Let's omit it for now as we control the span directly. */}
-        {/* <NodeViewContent /> */}
       </NodeViewWrapper>
     );
   }
@@ -319,12 +361,13 @@ export const DateComponent: React.FC<DateNodeViewProps> = ({
               editor.commands.setNodeSelection(pos);
             }
           }
-          // Update attribute to switch to editing mode
           updateAttributes({ isEditing: true });
         }
       }}
+      date-id={dateId}
+      date-date={dateValue}
     >
-      {displayText || "..."} {/* Show display text or placeholder */}
+      {displayText || "..."}
     </NodeViewWrapper>
   );
 };

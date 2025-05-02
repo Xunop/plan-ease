@@ -1,0 +1,69 @@
+.formulas-node {
+  display: inline-block; // Or inline, depending on desired flow
+  border: 1px solid #eee;
+  border-radius: 4px;
+  padding: 0.1em 0.4em;
+  margin: 0 0.1em;
+  white-space: nowrap; // Prevent breaking mid-formula
+
+  // Base style for inner spans
+  > span {
+    display: inline;
+    margin-right: 0.3em; // Spacing between parts
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  // Specific styles from user reference
+  .cmd-prefix {
+    color: #333;
+    font-weight: 700;
+  }
+
+  .cmd-literal {
+    color: #888;
+    font-style: italic; // Example addition
+  }
+
+  .cmd-option {
+    color: #5c7cfa;
+    font-weight: 700; // Slightly less bold than prefix?
+    background-color: #eef2ff; // Example background
+    padding: 0.05em 0.2em;
+    border-radius: 3px;
+  }
+
+  // Styles for result parts
+  .result-separator {
+    color: #aaa;
+    margin-left: 0.1em;
+    margin-right: 0.4em;
+  }
+
+  .result-field {
+    color: #666;
+    font-size: 0.9em;
+    margin-right: 0.15em;
+  }
+
+  .result-value {
+    color: #222;
+    font-weight: 500;
+  }
+
+  .result-fallback {
+     color: #555;
+  }
+
+  // Error styling
+  &.status-error {
+    border-color: #f8d7da;
+    background-color: #f8d7da;
+  }
+  .error {
+    color: #721c24; // Bootstrap danger text color
+    font-style: italic;
+  }
+}

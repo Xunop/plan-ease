@@ -3,23 +3,12 @@
 import { Editor, Range } from "@tiptap/core";
 import { ReactRenderer } from "@tiptap/react";
 import { CmdSugRef, CommandSugContent } from "./CommandSugContent";
-import {
-  CommandContext,
-  CommandResult,
-  CommandSuggestion,
-  QueryState,
-  ResolvedOptions,
-  SuggestionItem,
-  SuggestionQueryState,
-} from "./types";
-import { commands } from "./commands";
-import { getStore } from "@/providers/location-store-provider";
-//import { buildNodeSequence, resolveImplicitOptions } from "./commandUtils";
+import { CommandResult, CommandSuggestion, QueryState } from "./types";
 import { PluginKey } from "@tiptap/pm/state";
-import { debounce, throttle } from "lodash";
-import { generateFixedLengthId } from "@/lib/utils/index";
+import { throttle } from "lodash";
 import { processCommandQuery } from "./queryProcessor";
-import { initialSuggestions } from "./suggestions";
+import { initialSuggestions, updateInitialSuggestions } from "./suggestions";
+import { FormulasAttributes } from "../Formulas/types";
 
 type SuggestionProps = {
   editor: Editor;
@@ -34,11 +23,6 @@ const throttleFetchSlash = throttle(
       initialSuggestions,
     );
 
-    const context: CommandContext = {
-      editor: editor,
-      pos: editor.state.selection.from,
-      store: getStore(),
-    };
     return suggestionState.suggestions.slice(0, 10);
   },
   300,
@@ -70,6 +54,8 @@ export default {
           editor: props.editor,
         });
         const ref = component.ref as CmdSugRef;
+
+        updateInitialSuggestions();
         ref.handleShow();
       },
 
@@ -103,82 +89,101 @@ export default {
     range: Range;
     props: any;
   }) => {
-    const commandName = selectionProps.commandName; // Get command name from selected item props
-
-    const commandDef = commands.find((cmd) => cmd.name === commandName);
-    if (!commandDef) {
-      console.error(`Command definition not found for "${commandName}"`);
+    const commandSug = selectionProps.commandSug as CommandSuggestion; // Get command name from selected item props
+    if (!commandSug.baseDefinition?.action) {
+      console.error("Selected suggestion has no action defined.");
       return;
     }
 
-    // 1. Final Parsing of text in range (might be slightly different from suggestion query)
-    // Get text content within the suggestion trigger range
-    const commandText = editor.state.doc.textBetween(
-      range.from,
-      range.to,
-      "\n",
-      " ",
-    );
-    // We need the *full* command query state here, including parsed explicit options
-    // Let's reuse the suggestion query function for simplicity, assuming the text is correct
-    // A more robust way might be needed if the text differs significantly
-    const finalSuggestionState = getCommandSuggestions(commandText, commands); // Re-run suggestion matching on the range text
-    const explicitOptions =
-      finalSuggestionState.explicitOptionsForBestMatch ?? {};
-
-    // 2. Prepare Context
-    // Ensure store is accessible here. Using getState() if outside React component.
-    const context: CommandContext = {
-      editor,
-      pos: range.from, // Use start of range as context position
-      store: getStore(),
+    let commandResult: CommandResult | null = null;
+    let formulasAttrs: Partial<FormulasAttributes> = {
+      commandName: commandSug.baseDefinition.name,
+      // Pass the displayOptions used, not the action options, for rendering context
+      displayOptions: commandSug.displayOptions ?? commandSug.options,
+      status: "success", // Assume success initially
     };
 
     try {
-      // 3. Resolve ALL options (explicit + implicit)
-      const resolvedOptions: ResolvedOptions = await resolveImplicitOptions(
-        commandDef,
-        explicitOptions,
-        context,
+      // --- Execute the action ---
+      commandResult = await commandSug.baseDefinition.action(
+        commandSug.options,
+      ); // Pass ACTION options
+
+      // Populate attributes from the result
+      formulasAttrs.resultData = commandResult?.data ?? null;
+      formulasAttrs.resultDisplay = commandResult?.display ?? null;
+      formulasAttrs.status = "success";
+    } catch (error: any) {
+      console.error(
+        `Error executing command "${commandSug.baseDefinition?.name}":`,
+        error,
       );
+      formulasAttrs.status = "error";
+      formulasAttrs.errorMessage = error.message || "Action failed";
+      // Keep resultData/Display as null or empty from initialization
+    }
 
-      // 4. (Optional) Final action call if needed (e.g., for validation or data not in resolvedOptions)
-      // If action's main job was moved to resolveImplicitOptions, this might not be needed
-      // Or it might return the final validated/structured data
-      // const finalNodeData = await commandDef.action(resolvedOptions, context);
-      // For now, assume resolvedOptions contains all needed data.
-
-      // 5. Build Node Sequence
-      const nodeSequence = buildNodeSequence(commandDef, resolvedOptions);
-
-      // 6. Insert Content
+    // --- Insert the Formulas Node ---
+    try {
       // Handle potential space override like in the original code
       const nodeAfter = editor.view.state.selection.$to.nodeAfter;
       const overrideSpace = nodeAfter?.text?.startsWith(" ");
-      const finalRange = { ...range }; // Clone range
       if (overrideSpace) {
-        finalRange.to += 1;
+        range.to += 1;
       }
 
+      console.log("Action Result:", commandResult);
+      const contentToInsert = [
+        {
+          type: "formulas",
+          attrs: formulasAttrs,
+        },
+        {
+          type: "text",
+          text: " ", // Add space immediately after
+        },
+      ];
+
+      // Perform the insertion and replacement in one go
       editor
         .chain()
-        .focus()
-        .insertContentAt(finalRange, nodeSequence) // Insert the sequence
+        .focus() // Focus before making changes
+        // Replace the content in finalRange with the node and space
+        .insertContentAt(range, contentToInsert)
+        // **** REMOVED the manual .command() for selection setting ****
+        // Let Tiptap handle the selection placement after insertContentAt initially.
+        // Tiptap usually places the cursor after the inserted content.
         .run();
 
-      // Collapse selection after insertion (from original code)
-      editor.view.dom.ownerDocument.defaultView
-        ?.getSelection()
-        ?.collapseToEnd();
-    } catch (error: any) {
-      console.error(`Error executing command "${commandName}":`, error);
-      // Optionally insert an error node or show a notification to the user
+      // editor
+      //   .chain()
+      //   // Use the custom command to insert/replace with the formulas node
+      //   .insertFormulas(formulasAttrs, finalRange)
+      //   // Optionally add a space after the node automatically
+      //   .insertContent(" ")
+      //   // Move cursor after the inserted content + space
+      //   .command(({ tr, dispatch }) => {
+      //     if (dispatch) {
+      //       // Move selection to the end of the inserted content + space
+      //       // const endPos = finalRange.from + (tr.steps[tr.steps.length - 1]?.slice?.content?.size ?? 0) + 1; // Crude estimate, might need refinement
+      //       tr.setSelection(
+      //         TextSelection.create(tr.doc, tr.mapping.map(finalRange.to) + 1),
+      //       ); // Move after the space
+      //     }
+      //     return true;
+      //   })
+      //   .focus() // Refocus editor
+      //   .run();
+    } catch (insertError) {
+      console.error("Error inserting formulas node:", insertError);
+      // Fallback? Maybe insert plain text error?
       editor
         .chain()
         .focus()
-        .insertContentAt(range, [
-          { type: "text", text: `Error: ${error.message} ` },
-        ])
+        .insertContentAt(
+          range,
+          `Error displaying result: ${formulasAttrs.errorMessage || "Unknown Error"} `,
+        )
         .run();
     }
   },
