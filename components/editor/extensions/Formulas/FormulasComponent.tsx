@@ -1,7 +1,10 @@
 import React from "react";
-import { NodeViewWrapper, NodeViewContent, NodeViewProps } from "@tiptap/react";
-import { FormulasAttributes } from "./types"; // Adjust path
+import { NodeViewWrapper, NodeViewProps } from "@tiptap/react";
+import { FormulasAttributes } from "./types";
 import "./formulas.scss";
+
+import { Icon } from "@/components/ui/icon";
+import { getWeatherVisuals } from "./utils";
 
 const FormulasComponent: React.FC<NodeViewProps> = ({ node, editor }) => {
   // Cast attributes to the specific type for type safety
@@ -16,11 +19,15 @@ const FormulasComponent: React.FC<NodeViewProps> = ({ node, editor }) => {
   } = attrs;
 
   const renderWeatherResult = () => {
-    // Prefer structured data if available
     if (resultData?.forecast && resultData?.city) {
       const forecast = resultData.forecast;
-      const city = displayOptions?.address ?? resultData.city; // Use display name if possible
-      const date = displayOptions?.date ?? forecast.date; // Use display date if possible
+      const city = displayOptions?.address ?? resultData.city;
+      const date = displayOptions?.date ?? forecast.date;
+
+      // Get visuals for day and night
+      const dayVisuals = getWeatherVisuals(forecast.dayweather || "");
+      const nightVisuals = getWeatherVisuals(forecast.nightweather || "");
+
       return (
         <>
           <span className="cmd-prefix">Weather</span>
@@ -29,19 +36,39 @@ const FormulasComponent: React.FC<NodeViewProps> = ({ node, editor }) => {
           <span className="cmd-literal"> on </span>
           <span className="cmd-option">{date}</span>
           <span className="result-separator">: </span>
+          {/* Day Weather */}
           <span className="result-field">Day</span>{" "}
           <span className="result-value">
             {forecast.dayweather} ({forecast.daytemp}°C)
           </span>
-          , <span className="result-field">Night</span>{" "}
+          <span className="weather-icon-container">
+            <Icon
+              name={dayVisuals.iconName}
+              className={`weather-icon ${dayVisuals.animationClass}`}
+              strokeWidth={3}
+              aria-label={forecast.dayweather}
+            />
+          </span>
+          {/* Night Weather */}
+          <span className="result-separator">, </span> {/* Separator */}
+          <span className="result-field">Night</span>{" "}
           <span className="result-value">
             {forecast.nightweather} ({forecast.nighttemp}°C)
           </span>
-          .
+          <span className="weather-icon-container">
+            <Icon
+              name={nightVisuals.iconName}
+              // If night, consider using 'Moon', 'CloudMoon' etc. if possible
+              // Example: name={isNight ? getNightEquivalent(nightVisuals.iconName) : nightVisuals.iconName}
+              className={`weather-icon ${nightVisuals.animationClass}`}
+              strokeWidth={3} // Optional: adjust stroke width
+              aria-label={forecast.nightweather} // Accessibility
+            />
+          </span>
         </>
       );
     }
-    // Fallback to display string
+    // Fallback remains the same
     return (
       <span className="result-fallback">
         {resultDisplay || "Weather data unavailable"}
@@ -86,7 +113,7 @@ const FormulasComponent: React.FC<NodeViewProps> = ({ node, editor }) => {
     if (status === "error") {
       return renderError();
     }
-    console.log(`command name: ${commandName}`)
+    console.log(`command name: ${commandName}`);
     switch (commandName) {
       case "Weather":
         return renderWeatherResult();
@@ -111,7 +138,7 @@ const FormulasComponent: React.FC<NodeViewProps> = ({ node, editor }) => {
       className={`formulas-node status-${status}`}
       contentEditable={false}
     >
-    {renderContent()}
+      {renderContent()}
     </NodeViewWrapper>
   );
 };

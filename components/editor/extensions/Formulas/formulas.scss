@@ -7,7 +7,7 @@
   white-space: nowrap; // Prevent breaking mid-formula
 
   // Base style for inner spans
-  > span {
+  >span {
     display: inline;
     margin-right: 0.3em; // Spacing between parts
 
@@ -54,7 +54,7 @@
   }
 
   .result-fallback {
-     color: #555;
+    color: #555;
   }
 
   // Error styling
@@ -62,8 +62,186 @@
     border-color: #f8d7da;
     background-color: #f8d7da;
   }
+
   .error {
     color: #721c24; // Bootstrap danger text color
     font-style: italic;
+  }
+
+  .weather-icon-container {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.3em;
+    vertical-align: middle;
+    // Add a fixed size to prevent layout shifts during animation
+    width: 1.2em;
+    height: 1.2em;
+    justify-content: center; // Center icon if container is slightly larger
+  }
+
+  .weather-icon {
+    // The Icon component applies w-4 h-4 by default (1rem)
+    // We can override or adjust if needed via className prop,
+    // but let's try relying on the container size first.
+    // width: 1.2em; // Controlled by Icon component default/props
+    // height: 1.2em; // Controlled by Icon component default/props
+    display: inline-block; // Should be default for SVG
+    vertical-align: middle;
+    overflow: visible; // Keep for potential future effects
+
+    // Default styles
+    color: #666;
+
+    // --- Animations ---
+
+    &--sunny {
+      color: #f9d71c; // Amber/Gold
+      animation: rotate 10s linear infinite;
+    }
+
+    &--cloudy {
+      color: #a0aec0; // Cool Gray
+      animation: drift 8s ease-in-out infinite alternate;
+    }
+
+    // ** Adjusted Rain animation **
+    &--rainy {
+      color: #4a5568; // Darker Gray for cloud
+      // Subtle up/down bobbing animation for the whole icon
+      animation: bobbing 1.8s ease-in-out infinite;
+    }
+
+    // ** Adjusted Snow animation **
+    &--snowy {
+      color: #e2e8f0; // Light Gray/White for snowflake
+      // Gentle rotation + slight bobbing
+      animation: rotate 8s linear infinite, bobbing 2.5s ease-in-out infinite alternate;
+    }
+
+    &--partly-cloudy {
+      // Lucide CloudSun has fixed colors, so color override might not work as expected.
+      // Stick to animation or subtle color shift if needed.
+      color: #718096; // Slightly different gray?
+      animation: drift 12s ease-in-out infinite alternate; // Slower drift
+    }
+
+    &--stormy {
+      color: #ecc94b; // Yellow for lightning part
+      animation: flash 1.5s steps(1, end) infinite; // Flashing effect
+    }
+
+    &--foggy {
+      color: #cbd5e0; // Light gray
+      animation: pulse-opacity 3s ease-in-out infinite alternate; // Fade in/out slightly
+    }
+
+    &--windy {
+      color: #718096; // Gray
+      animation: sway 2s ease-in-out infinite alternate; // Side-to-side motion
+    }
+
+    &--hot {
+      color: #f56565; // Reddish
+      animation: shimmer 1.5s ease-in-out infinite alternate;
+    }
+
+    &--cold {
+      color: #63b3ed; // Blueish
+      animation: pulse-opacity 4s ease-in-out infinite alternate; // Subtle pulse
+    }
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes drift {
+  from {
+    transform: translate(-1px, -1px);
+  }
+
+  // Smaller drift for icons
+  to {
+    transform: translate(1px, 1px);
+  }
+}
+
+// New/Adjusted Keyframes
+@keyframes bobbing {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
+  }
+
+  // Gentle up/down movement
+}
+
+@keyframes flash {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
+
+  // Quick dim/flash
+}
+
+@keyframes pulse-opacity {
+  from {
+    opacity: 0.6;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sway {
+  from {
+    transform: translateX(-2px) rotate(-3deg);
+  }
+
+  to {
+    transform: translateX(2px) rotate(3deg);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    filter: brightness(1.0);
+    transform: scale(1.0);
+  }
+
+  to {
+    filter: brightness(1.2); // Subtle brightness increase
+    transform: scale(1.03); // Slight scale up
+  }
+}
+
+
+/* Consider adding prefers-reduced-motion media query */
+@media (prefers-reduced-motion: reduce) {
+  .weather-icon {
+    // Target all animated icons
+    animation: none !important; // Disable animations
+    opacity: 1 !important; // Ensure full opacity if animation used it
+    transform: none !important; // Reset transforms
+    filter: none !important;
   }
 }

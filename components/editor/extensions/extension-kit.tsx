@@ -80,8 +80,8 @@ export const ExtensionKit = ({
     }),
 
     // DataRoute,
-    // PlanList,
-    // PlanItem,
+    PlanList,
+    PlanItem,
     DateNode,
     Slash.configure({
         suggestion: CommandSuggestion,
