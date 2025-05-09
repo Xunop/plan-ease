@@ -7,7 +7,7 @@ const toLatLng = (str: string): [number, number] => {
   return [lat, lng];
 };
 
-export const getPolyline = (
+export const getPolylineCoords = (
   route: AmapRoute,
   origin: string,
   destination: string,

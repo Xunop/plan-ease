@@ -5,7 +5,7 @@ import { useBoundStore } from "@/providers/location-store-provider";
 import { Route } from "@/stores/location-store";
 import isEqual from "lodash/isEqual";
 import { fetchAmapDirection } from "@/lib/api/gaode/outline";
-import { getPolyline } from "./utils";
+import { getPolylineCoords } from "./utils";
 // import "leaflet-routing-machine" from "leaflet-routing-machine";
 
 // Define static tile layers and icon outside the component
@@ -15,7 +15,6 @@ const gaoDeNormal = L.tileLayer(
   {
     subdomains: ["1", "2", "3", "4"],
     attribution: 'Map data © <a href="https://www.amap.com/">GaoDe</a>',
-    // attribution: '&copy; <a href="https://stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
   },
 );
 
@@ -58,7 +57,24 @@ const MapComponent: React.FC = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const layerGroupRef = useRef<L.LayerGroup | null>(null);
-  const { locations, places, routes } = useBoundStore((state) => state);
+  // Store polyline, key is routeId
+  const polylineLayersRef = useRef<Record<string, L.Polyline>>({});
+  const { locations, places, routes, curPLHeiLine } = useBoundStore(
+    (state) => state,
+  );
+  const highlightedRouteId = curPLHeiLine?.routeId ?? "";
+
+  const NORMAL_POLYLINE_STYLE = {
+    color: "#5C7CFA",
+    weight: 4,
+    opacity: 0.8,
+  };
+
+  const HIGHLIGHTED_POLYLINE_STYLE = {
+    color: "#3355DD",
+    weight: 7,
+    opacity: 1.0,
+  };
 
   // Initialize the map once on mount
   useEffect(() => {
@@ -121,10 +137,24 @@ const MapComponent: React.FC = () => {
 
   const prevRoutesRef = useRef<Route[]>([]);
 
+  const applyHighlight = (polyline?: L.Polyline) => {
+    if (polyline) {
+      polyline.setStyle(HIGHLIGHTED_POLYLINE_STYLE);
+      polyline.bringToFront();
+    }
+  };
+
+  const removeHighlight = (polyline?: L.Polyline) => {
+    if (polyline) {
+      polyline.setStyle(NORMAL_POLYLINE_STYLE);
+    }
+  };
+
   // Update polyline when routes update
   useEffect(() => {
     if (mapInstanceRef.current) {
       const map = mapInstanceRef.current;
+      const currentPolylinesMap = polylineLayersRef.current;
 
       const prevRoutes = prevRoutesRef.current;
       const currentRoutes = routes;
@@ -135,61 +165,114 @@ const MapComponent: React.FC = () => {
       );
 
       // Find removed routes: in previous but not in current
-      const removedRoutes = prevRoutes.filter(
-        (prev) => !currentRoutes.some((route) => route.id === prev.id),
-      );
+      const removedRouteIds = prevRoutes
+        .filter((prev) => !currentRoutes.some((route) => route.id === prev.id))
+        .map((route) => route.id);
 
       // Find updated routes: in both, but properties differ
       const updatedRoutes = currentRoutes.filter((route) => {
         const prevRoute = prevRoutes.find((prev) => prev.id === route.id);
-        return prevRoute && !isEqual(prevRoute, route);
+        return prevRoute && !isEqual(prevRoute.locations, route.locations);
       });
 
-      // Process the changes
-      addedRoutes.forEach((route) => {
-        console.log("Route added:", route);
-        const locations = route.locations;
-        const len = locations.length;
-        if (len > 0) {
-          if (len > 1) {
-            const origin = locations[0];
-            const destination = locations[len - 1];
-            let waypoints = "";
-            if (locations.length > 2) {
-              waypoints = locations.slice(1, len - 1).join(";");
-            }
-            fetchAmapDirection({ origin, destination, waypoints }).then(
-              (route) => {
-                const polyline = getPolyline(route, origin, destination);
-                // Add the origin and destination points to the polyline (ensure they are part of the route)
-                const line = L.polyline(polyline, {
-                  color: "#5C7CFA",
-                  smoothFactor: 1,
-                  weight: 4,
-                }).addTo(map);
-                map.fitBounds(line.getBounds());
-              },
-            );
-          } else {
-            const lat = parseFloat(locations[0].split(",")[1]);
-            const lng = parseFloat(locations[0].split(",")[0]);
-            map.flyTo(latLng(lat, lng));
-          }
+      // Remove old routes
+      removedRouteIds.forEach((routeId) => {
+        const polylineToRemove = currentPolylinesMap[routeId];
+        if (polylineToRemove) {
+          map.removeLayer(polylineToRemove);
+          delete currentPolylinesMap[routeId];
+          console.log("Polyline removed for route ID:", routeId);
         }
       });
 
-      updatedRoutes.forEach((route) => {
-        console.log("Route updated:", route);
-      });
+      // Added and updated
+      const routesToProcess = [...addedRoutes, ...updatedRoutes];
 
-      removedRoutes.forEach((route) => {
-        console.log("Route removed:", route);
-      });
+      // Process the changes
+      routesToProcess.forEach((route) => {
+        console.log(
+          addedRoutes.includes(route) ? "Route added:" : "Route updated:",
+          route.id,
+        );
+        if (updatedRoutes.includes(route) && currentPolylinesMap[route.id]) {
+          map.removeLayer(currentPolylinesMap[route.id]);
+          delete currentPolylinesMap[route.id];
+        }
 
-      // Update the ref with the current routes for the next render
-      prevRoutesRef.current = currentRoutes;
+        const routeLocations = route.locations;
+        const len = routeLocations.length;
+
+        if (len > 1) {
+          const origin = routeLocations[0];
+          const destination = routeLocations[len - 1];
+          let waypoints = "";
+          if (routeLocations.length > 2) {
+            waypoints = routeLocations.slice(1, len - 1).join(";");
+          }
+
+          fetchAmapDirection({ origin, destination, waypoints })
+            .then((apiRouteResponse) => {
+              const polylinePath = getPolylineCoords(
+                apiRouteResponse,
+                origin,
+                destination,
+              );
+
+              if (!polylinePath || polylinePath.length === 0) {
+                console.warn("Empty polyline path for route:", route.id);
+                return;
+              }
+
+              const leafletPolyline = L.polyline(
+                polylinePath,
+                NORMAL_POLYLINE_STYLE,
+              ).addTo(map);
+
+              // Store Polyline
+              currentPolylinesMap[route.id] = leafletPolyline;
+
+              leafletPolyline.on("mouseover", function (this: L.Polyline) {
+                  applyHighlight(this);
+              });
+
+              leafletPolyline.on("mouseout", function (this: L.Polyline) {
+                  removeHighlight(this);
+              });
+
+              leafletPolyline.on("click", () => {
+                console.log(`Polyline for route ${route.id} clicked.`);
+                // Select a route or show details
+              });
+
+              // Adjust map view if this route is new
+              if (addedRoutes.includes(route)) {
+                map.fitBounds(leafletPolyline.getBounds(), {
+                  paddingTopLeft: [50, 50],
+                  paddingBottomRight: [50, 50],
+                });
+              }
+
+              if (route.id === highlightedRouteId) {
+                applyHighlight(leafletPolyline);
+              }
+            })
+            .catch((error) => {
+              console.error(
+                "Error fetching or processing route direction for ID:",
+                route.id,
+                error,
+              );
+            });
+        } else if (len === 1) {
+          // Single location handle
+          const [lng, lat] = routeLocations[0].split(",").map(parseFloat);
+          map.flyTo(latLng(lat, lng));
+        }
+      });
+      polylineLayersRef.current = currentPolylinesMap;
+      prevRoutesRef.current = JSON.parse(JSON.stringify(currentRoutes));
     }
-  }, [routes]);
+  }, [routes, highlightedRouteId]);
 
   return <div ref={mapRef} className="h-screen" />;
 };

@@ -3,6 +3,7 @@ import { create, StateCreator } from "zustand";
 import Fuse from "fuse.js";
 import { pinyin } from "pinyin-pro";
 import { locationOptions } from "./fuseOptions";
+import { isEqual } from "lodash";
 
 export type Location = {
   id: string;
@@ -30,6 +31,12 @@ export type ButtonPosition = {
   right: number;
   lineHeight: number;
   nodePos: number;
+};
+
+export type PLHeightLight = {
+  routeId: string;
+  heightLight: boolean;
+  color: string;
 };
 
 interface LocationSlice {
@@ -79,10 +86,23 @@ interface EditorButtonList {
   }: ButtonPosition) => void;
 }
 
+interface CurPLHeightLight {
+  curPLHeiLine: PLHeightLight | undefined; // If no heiline, value is undefined
+  ChangePLHeiLien: (id: string, isHeiLight: boolean, color: string) => void;
+}
+
+// interface PLHeightLightSlice {
+//   plHeightLights: PLHeightLight[];
+//   GetPLHeightLight: (id: string) => PLHeightLight | undefined;
+//   AddPLHeightLight: (id: string, isHeiLight: boolean, color: string) => void;
+// }
+
 export type Store = LocationSlice &
   PlaceSlice &
   RouteSlice &
   DateSlice &
+  // PLHeightLightSlice &
+  CurPLHeightLight &
   EditorButtonList;
 
 export const defaultInitState = {
@@ -98,6 +118,7 @@ export const defaultInitState = {
     bottom: 0,
     lineHeight: 0,
   } as ButtonPosition,
+  heiLine: undefined,
 };
 
 const createLocationSlice: StateCreator<Store, [], [], LocationSlice> = (
@@ -331,12 +352,67 @@ const createEditorButtonList: StateCreator<Store, [], [], EditorButtonList> = (
     set(() => ({ buttonListPos: pos })),
 });
 
+// const createPLHeightLightSlice: StateCreator<
+//   Store,
+//   [],
+//   [],
+//   PLHeightLightSlice
+// > = (set, get) => ({
+//   plHeightLights: defaultInitState.heiLines,
+//   GetPLHeightLight: (id: string): PLHeightLight | undefined => {
+//     const state = get(); // Get the current state
+//     return state.plHeightLights.find((line) => line.routeId === id); // Return the route or undefined
+//   },
+//   AddPLHeightLight: (id: string, isHeiLight: boolean, color: string) =>
+//     set((state) => {
+//       const exists = state.plHeightLights.find((line) => line.routeId === id);
+//       const newLine: PLHeightLight = {
+//         routeId: id,
+//         color: color,
+//         heightLight: isHeiLight,
+//       };
+//       if (exists !== undefined) {
+//         console.warn("PLHeightLight exists, check to update");
+//         if (isEqual(newLine, exists)) {
+//           return {};
+//         }
+//       }
+//
+//       return { plHeightLights: [...state.plHeightLights], newLine };
+//     }),
+// });
+
+const createCurPLHeightLight: StateCreator<Store, [], [], CurPLHeightLight> = (
+  set,
+) => ({
+  curPLHeiLine: defaultInitState.heiLine,
+  ChangePLHeiLien: (id: string, isHeiLight: boolean, color: string) => {
+    set((state) => {
+      const exists = state.curPLHeiLine;
+      const newLine: PLHeightLight = {
+        routeId: id,
+        color: color,
+        heightLight: isHeiLight,
+      };
+      if (exists !== undefined) {
+        console.warn("PLHeightLight exists, check to update");
+        if (isEqual(newLine, exists)) {
+          return {}; // No need change
+        }
+      }
+
+      return { curPLHeiLine: newLine };
+    });
+  },
+});
+
 export const createBoundStore = () => {
   return create<Store>()((...a) => ({
-    ...createPlaceSlice(...a),
     ...createRouteSlice(...a),
     ...createEditorButtonList(...a),
     ...createLocationSlice(...a),
     ...createDateslice(...a),
+    ...createPlaceSlice(...a),
+    ...createCurPLHeightLight(...a),
   }));
 };

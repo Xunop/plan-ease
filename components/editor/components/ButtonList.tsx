@@ -24,7 +24,7 @@ const ButtonListComponent: React.FC<ButtonListComponentProps> = ({
                 <button
                     key={index}
                     onClick={button.onClick}
-                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-200 focus:outline-none"
                 >
                     {button.icon}
                 </button>
