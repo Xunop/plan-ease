@@ -1,6 +1,8 @@
 /* Basic editor styles */
 .tiptap {
 
+  font-family: sans-serif;
+
   /* Fully transparent */
   :first-child {
     margin-top: 0;
@@ -345,5 +347,5 @@ body {
 }
 
 .ProseMirror {
-  padding: 1rem;
+  padding: 0.9rem;
 }

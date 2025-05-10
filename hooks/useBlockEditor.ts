@@ -40,7 +40,7 @@ export const useBlockEditor = ({
     // FIXME: In client side, we should set to true, but tiptap will throw ssr error
     immediatelyRender: false,
     shouldRerenderOnTransaction: true,
-    autofocus: "all",
+    autofocus: true,
     editorProps: {
       attributes: {
         autocomplete: "off",

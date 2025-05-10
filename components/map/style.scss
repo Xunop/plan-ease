@@ -1,7 +1,169 @@
-.interactive-map {
-    height: 100%;
+$leaflet-popup-bg: #ffffff;
+$leaflet-popup-padding: 0; // We'll let PopoverEditor handle its own padding
+$leaflet-popup-border-radius: 8px;
+$leaflet-popup-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+$leaflet-control-bg: rgba(255, 255, 255, 0.9);
+$leaflet-control-border-color: #ccc;
+$leaflet-control-border-radius: 5px;
+$leaflet-control-margin: 12px; // Consistent margin for controls
+$leaflet-control-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+
+$leaflet-button-color: #333;
+$leaflet-button-hover-bg: #f4f4f4;
+
+// --- General Map Container ---
+// .leaflet-container {
+//   // Example: ensure no weird focus outline from Leaflet itself
+//   &:focus {
+//     outline: none;
+//   }
+// }
+
+// --- Popup Customizations ---
+.leaflet-popup {
+
+  .leaflet-popup-content-wrapper {
+    background-color: $leaflet-popup-bg;
+    padding: $leaflet-popup-padding; // Reset Leaflet's padding
+    border-radius: $leaflet-popup-border-radius;
+    box-shadow: $leaflet-popup-shadow;
+    // Ensure it doesn't have an excessive default width if content dictates it
+    // max-width: none; // Uncomment if Leaflet's default max-width is an issue
+  }
+
+  .leaflet-popup-content {
+    margin: 0 !important; // Override default Leaflet margin to prevent double margins with inner content
+    font-size: 16px;
+    line-height: 24px;
+    overflow-y: auto;
+  }
+
+  .leaflet-popup-tip-container {
+    // Tip container can sometimes cause slight visual offsets.
+  }
+
+  .leaflet-popup-tip {
+    // background: $leaflet-popup-bg;
+    // box-shadow: $leaflet-popup-shadow; // Tip can also have shadow if desired
+    // border: none;
+  }
+
+  .leaflet-popup-close-button {
+    top: 5px;
+    right: 5px;
+    width: auto;
+    height: auto;
+    font-size: 18px;
+    color: #777;
+    background-color: transparent;
+    border-radius: 50%;
+    transition: color 0.2s ease, background-color 0.2s ease;
+
+    &:hover {
+      color: #333;
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    span {
+      // For accessibility, ensure the '×' is clear
+      line-height: 1; // Adjust if '×' is not centered
+    }
+  }
 }
 
-.amap-maps {
-    border-radius: 0.75rem;
+// --- Control Customizations (Zoom, Layers, Scale, Attribution) ---
+.leaflet-control {
+  // General margin for all controls if needed, but usually per-control is better.
 }
+
+.leaflet-control-zoom {
+  margin: $leaflet-control-margin !important; // Force margin if default is too small or inconsistent
+  border: none; // Remove default border if using box-shadow for depth
+  border-radius: $leaflet-control-border-radius;
+  box-shadow: $leaflet-control-shadow;
+}
+
+.leaflet-bar {
+  border-radius: $leaflet-control-border-radius; // Apply to the bar itself
+  box-shadow: none; // If the parent .leaflet-control-zoom has the shadow
+
+  a,
+  a:hover {
+    background-color: $leaflet-control-bg;
+    color: $leaflet-button-color;
+    border-bottom: 1px solid $leaflet-control-border-color;
+    width: 32px; // Consistent width
+    height: 32px; // Consistent height
+    line-height: 32px; // Center icon/text
+    font-size: 1.3em;
+    transition: background-color 0.2s ease;
+  }
+
+  a:hover {
+    background-color: $leaflet-button-hover-bg;
+  }
+
+  a:first-of-type {
+    border-top-left-radius: $leaflet-control-border-radius;
+    border-top-right-radius: $leaflet-control-border-radius;
+  }
+
+  a:last-of-type {
+    border-bottom-left-radius: $leaflet-control-border-radius;
+    border-bottom-right-radius: $leaflet-control-border-radius;
+    border-bottom: none; // No border for the last button in the bar
+  }
+
+  // For disabled states if applicable
+  // a.leaflet-disabled {
+  //   cursor: default;
+  //   background-color: #f0f0f0;
+  //   color: #999;
+  // }
+}
+
+.leaflet-control-layers {
+  margin: $leaflet-control-margin;
+  border-radius: $leaflet-control-border-radius;
+  box-shadow: $leaflet-control-shadow;
+  background-color: $leaflet-control-bg;
+
+  .leaflet-control-layers-list {
+    // Style for the list of layers
+  }
+
+  .leaflet-control-layers-selector {
+    // Style for radio/checkbox
+    margin-right: 5px;
+  }
+
+  .leaflet-control-layers-toggle {
+    // Style for the layers icon if not using default
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.leaflet-control-attribution {
+  margin: 0 !important; // Usually at the bottom, can be fine-tuned
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  padding: 2px 6px;
+
+  a {
+    color: #0078a8; // Make links clearer
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// --- Marker Customizations ---
+// .leaflet-marker-icon {
+// }
+// .leaflet-marker-shadow {
+//   // display: none !important;
+// }

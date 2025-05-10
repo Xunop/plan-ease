@@ -57,12 +57,11 @@ export function PopoverEditor({
 
     const isEmpty = popoverEditor.isEmpty;
 
-    // FIXME: Now no check editor is empty, and need to fix store use input.
+    // FIXME: Now no check editor is empty
     // if (isEmpty) {
     // Build the default JSON content from AmapPlace
     const listItems = [];
 
-    // console.log("debug::place:", place)
     if (place !== null) {
       // Add address
       listItems.push({

@@ -22,6 +22,8 @@ export type Route = {
   id: string;
   name?: string;
   locations: string[];
+  normalColor?: string;
+  highLightColor?: string
 };
 
 export type ButtonPosition = {
@@ -58,7 +60,7 @@ interface PlaceSlice {
   places: AmapPlace[];
   AddPlace: (place: AmapPlace) => void;
   RemovePlace: (id: string) => void;
-  GetPlaceById: (id: string) => void;
+  GetPlaceById: (id: string) => AmapPlace | undefined;
   GetPlaceByLoc: (loc: string) => AmapPlace | undefined;
 }
 
@@ -397,7 +399,8 @@ const createCurPLHeightLight: StateCreator<Store, [], [], CurPLHeightLight> = (
       if (exists !== undefined) {
         console.warn("PLHeightLight exists, check to update");
         if (isEqual(newLine, exists)) {
-          return {}; // No need change
+          console.log("No need to change")
+          return {}; // No need to change
         }
       }
 

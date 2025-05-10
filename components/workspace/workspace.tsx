@@ -14,7 +14,7 @@ import { Doc as YDoc } from "yjs";
 import { EditorHeader } from "../editor/components/editor-header";
 
 import { Icon } from "../ui/icon";
-const MapComponent = dynamic(() => import("../map/leaflet"), { ssr: false });
+const MapComponent = dynamic(() => import("@/components/map/MapComponent"), { ssr: false });
 
 const Workspace = ({
     ydoc,
@@ -65,7 +65,7 @@ const Workspace = ({
                     className="resizable-panel"
                 >
                     <div className="bg-white h-full w-full rounded-xl overflow-hidden">
-                        <MapComponent />
+                        <MapComponent mainEditor={editor}/>
                     </div>
                 </ResizablePanel>
             </ResizablePanelGroup>

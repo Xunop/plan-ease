@@ -10,7 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { PopoverEditor } from "./PopoverEditor";
+import { PopoverEditor } from "@/components/editor/components/PopoverEditor";
 
 function Mention(props: NodeViewProps) {
   const { places, AddPlace, RemovePlace, AddLocation, RemoveLocation } =

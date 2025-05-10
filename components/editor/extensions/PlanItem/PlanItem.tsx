@@ -106,7 +106,6 @@ function PlanItemComponent(props: NodeViewProps) {
           // Throw error if it doesn't we need
           throw error;
         }
-        console.log("test")
         // Height line this route
         // default
         ChangePLHeiLien(dataId, true, "#fff")
