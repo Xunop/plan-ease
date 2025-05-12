@@ -1,4 +1,5 @@
-import L from 'leaflet';
+"use client";
+import L from "leaflet";
 
 // Define static tile layers
 export const gaoDeNormal = L.tileLayer(
@@ -43,6 +44,17 @@ export const customIcon = L.icon({
 });
 
 // Polyline styles
+export const DEFAULT_LINE_COLOR = "#5C7CFA";
+
+// Polyline styles
+export function normalPolyLineStyle(color?: string) {
+  return {
+    color: color || DEFAULT_LINE_COLOR,
+    weight: 4,
+    opacity: 0.9,
+  };
+}
+
 export const NORMAL_POLYLINE_STYLE = {
   color: "#5C7CFA",
   weight: 4,

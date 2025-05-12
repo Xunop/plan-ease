@@ -4,7 +4,7 @@ import isEqual from 'lodash/isEqual';
 import { Route } from '@/stores/location-store';
 import { fetchAmapDirection } from '@/lib/api/gaode/outline';
 import { getPolylineCoords } from '@/components/map/utils';
-import { NORMAL_POLYLINE_STYLE, HIGHLIGHTED_POLYLINE_STYLE } from '@/lib/map/leafletConfig';
+import { HIGHLIGHTED_POLYLINE_STYLE, normalPolyLineStyle } from '@/config/leafletConfig';
 
 interface UseMapPolylinesProps {
   map: L.Map | null;
@@ -29,9 +29,9 @@ export function useMapPolylines({
     }
   };
 
-  const removeHighlight = (polyline?: L.Polyline) => {
+  const removeHighlight = (polyline?: L.Polyline, color?: string) => {
     if (polyline) {
-      polyline.setStyle(NORMAL_POLYLINE_STYLE);
+      polyline.setStyle(normalPolyLineStyle(color));
     }
   };
 
@@ -71,6 +71,7 @@ export function useMapPolylines({
 
       const routeLocations = route.locations;
       const len = routeLocations.length;
+      const color = route.normalColor;
 
       if (len > 1) {
         const origin = routeLocations[0];
@@ -93,7 +94,7 @@ export function useMapPolylines({
             }
             const leafletPolyline = L.polyline(
               polylinePath,
-              NORMAL_POLYLINE_STYLE,
+              normalPolyLineStyle(color),
             ).addTo(map);
             currentPolylinesMap[route.id] = leafletPolyline;
 
@@ -116,7 +117,7 @@ export function useMapPolylines({
             if (route.id === highlightedRouteId) {
               applyHighlight(leafletPolyline);
             } else {
-              removeHighlight(leafletPolyline); // Ensure non-highlighted routes have normal style
+              removeHighlight(leafletPolyline, color); // Ensure non-highlighted routes have normal style
             }
           })
           .catch((error) => {

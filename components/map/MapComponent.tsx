@@ -1,6 +1,8 @@
+"use client";
+
 import { useMapPolylines } from "@/hooks/useMapPolylines";
 import { AmapPlace } from "@/lib/api/gaode/types";
-import { customIcon, gaoDeNormal } from "@/lib/map/leafletConfig";
+import { customIcon, gaoDeNormal } from "@/config/leafletConfig";
 import { useBoundStore } from "@/providers/location-store-provider";
 import { Location as LocationFromStore } from "@/stores/location-store";
 import { Editor } from "@tiptap/core";
