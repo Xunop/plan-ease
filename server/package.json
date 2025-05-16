@@ -1,0 +1,17 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "setup": "tsx hocuspocus.ts"
+  },
+  "dependencies": {
+    "@hocuspocus/extension-sqlite": "^2.15.2",
+    "@hocuspocus/server": "^2.15.2",
+    "tsx": "^4.19.4"
+  }
+}

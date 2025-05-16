@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "server:setup": "pnpm --filter=server run setup",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
