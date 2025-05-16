@@ -2,6 +2,8 @@ import { Server } from "@hocuspocus/server";
 import { SQLite } from "@hocuspocus/extension-sqlite";
 
 const port = parseInt(process.env.HOCUSPOCUS_PORT || "1234", 10);
+const host = process.env.HOCUSPOCUS_HOST || "0.0.0.0"
+const db = process.env.DATABASE_FILE || "planease.db"
 
 const hocuspocusServer = Server.configure({
   name: "hocuspocus-fra1-01",
@@ -9,11 +11,11 @@ const hocuspocusServer = Server.configure({
   debounce: 5000,
   maxDebounce: 30000,
   quiet: true,
-  address: "0.0.0.0", // default to listen all host
+  address: host, // default to listen all host
   port: port,
   extensions: [
     new SQLite({
-      database: "planease.db",
+      database: db,
     }),
   ],
 });

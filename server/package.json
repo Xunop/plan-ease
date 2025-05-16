@@ -7,11 +7,13 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "setup": "tsx hocuspocus.ts"
+    "setup": "tsx hocuspocus.ts",
+    "build": "tsx esbuild.config.ts"
   },
   "dependencies": {
     "@hocuspocus/extension-sqlite": "^2.15.2",
     "@hocuspocus/server": "^2.15.2",
+    "dotenv": "^16.5.0",
     "tsx": "^4.19.4"
   }
 }

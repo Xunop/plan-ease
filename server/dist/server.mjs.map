@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../hocuspocus.ts"],
+  "sourcesContent": ["import { Server } from \"@hocuspocus/server\";\nimport { SQLite } from \"@hocuspocus/extension-sqlite\";\n\nconst port = parseInt(process.env.HOCUSPOCUS_PORT || \"1234\", 10);\nconst host = process.env.HOCUSPOCUS_HOST || \"0.0.0.0\"\n\nconst hocuspocusServer = Server.configure({\n  name: \"hocuspocus-fra1-01\",\n  timeout: 30000,\n  debounce: 5000,\n  maxDebounce: 30000,\n  quiet: true,\n  address: host, // default to listen all host\n  port: port,\n  extensions: [\n    new SQLite({\n      database: \"planease.db\",\n    }),\n  ],\n});\n\nhocuspocusServer.listen(port, () => {\n  console.log(`Hocuspocus server listening on ws://${hocuspocusServer.URL}`);\n});\n\nprocess.on(\"SIGTERM\", () => {\n  console.log(\"SIGTERM signal received: closing Hocuspocus server\");\n  hocuspocusServer.destroy();\n});\n"],
+  "mappings": "8DAAA,OAAS,UAAAA,MAAc,qBACvB,OAAS,UAAAC,MAAc,+BADvB,IAAAC,EAAAC,EAAA,KAGA,IAAMC,EAAO,SAAS,OAAuC,EAAE,EACzDC,EAAO,UAEPC,EAAmBN,EAAO,UAAU,CACxC,KAAM,qBACN,QAAS,IACT,SAAU,IACV,YAAa,IACb,MAAO,GACP,QAASK,EACT,KAAMD,EACN,WAAY,CACV,IAAIH,EAAO,CACT,SAAU,aACZ,CAAC,CACH,CACF,CAAC,EAEDK,EAAiB,OAAOF,EAAM,IAAM,CAClC,QAAQ,IAAI,uCAAuCE,EAAiB,GAAG,EAAE,CAC3E,CAAC,EAED,QAAQ,GAAG,UAAW,IAAM,CAC1B,QAAQ,IAAI,oDAAoD,EAChEA,EAAiB,QAAQ,CAC3B,CAAC",
+  "names": ["Server", "SQLite", "require_hocuspocus", "__commonJSMin", "port", "host", "hocuspocusServer"]
+}
