@@ -6,8 +6,8 @@ import { IndexeddbPersistence } from "y-indexeddb";
 function getProvider({ docId, yDoc }: { docId: string; yDoc: YDoc }) {
   return new HocuspocusProvider({
     name: `${process.env.NEXT_PUBLIC_COLLAB_DOC_PREFIX}${docId}`,
-    // url: "ws://192.168.101.97:1234",
-    url: "ws://127.0.0.1:1234",
+    url: "ws://192.168.101.97:1234",
+    // url: "ws://127.0.0.1:1234",
     document: yDoc,
   });
 }

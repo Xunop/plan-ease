@@ -66,7 +66,6 @@ export function generateInitialSuggestions(): CommandSuggestion[] {
 
     // Generate suggestions based on command type
     if (commandDef.name === "Weather") {
-      console.log("Weather init", locations, dates);
       for (const loc of locations) {
         for (const d of dates) {
           const address = loc.location;
