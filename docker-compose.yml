@@ -1,6 +1,9 @@
 services:
   plan-ease-server:
     image: plan-ease-server:v0.0.1
+    build:
+      context: ./server
+      dockerfile: ./Dockerfile
     container_name: plan-ease-server
     ports:
       - "1234:1234"
@@ -13,6 +16,9 @@ services:
 
   plan-ease:
     image: plan-ease:v0.0.1
+    build:
+      context: .
+      dockerfile: ./Dockerfile
     container_name: plan-ease
     ports:
       - "3000:3000"
