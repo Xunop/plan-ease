@@ -133,7 +133,7 @@ const BlockEditor = ({
                     />
                 </div>
             )}
-            {/* <ContentItemMenu editor={editorProps} isEditable={isEditable} /> */}
+            <ContentItemMenu editor={editorProps} isEditable={isEditable} />
         </div>
     ) : null;
 };

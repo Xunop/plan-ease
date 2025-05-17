@@ -61,6 +61,7 @@ export function PopoverEditor({
     // if (isEmpty) {
     // Build the default JSON content from AmapPlace
     const listItems = [];
+    console.log("popover editor place: ", place)
 
     if (place !== null) {
       // Add address
@@ -149,7 +150,7 @@ export function PopoverEditor({
 
     // Set the default content
     // FIXME: always empty content if set default content
-    // popoverEditor.commands.setContent(defaultContent);
+    popoverEditor.commands.setContent(defaultContent);
     // }
 
     return () => {
