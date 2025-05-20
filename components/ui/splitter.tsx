@@ -1,4 +1,3 @@
-//components/Splitter.tsx
 import React, { useState, useCallback, useEffect, useRef } from "react";
 
 interface SplitterProps {

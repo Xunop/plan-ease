@@ -1,4 +1,3 @@
-// Define the types for the attributes our node will store
 export interface FormulasAttributes {
   commandName: string | null;
   // Store display options used to trigger the command for rendering context

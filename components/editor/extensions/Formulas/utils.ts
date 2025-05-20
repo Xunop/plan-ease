@@ -1,4 +1,3 @@
-// src/lib/weatherUtils.ts
 import { IconProps } from "@/components/ui/icon"; // Adjust the import path for your Icon component
 
 // Define Icon Name type (using the type from your Icon component)

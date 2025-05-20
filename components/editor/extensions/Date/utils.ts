@@ -1,5 +1,3 @@
-// src/lib/tiptap-extensions/DateNode/dateUtils.ts
-
 import {
   parse as dateFnsParse,
   format as dateFnsFormat,

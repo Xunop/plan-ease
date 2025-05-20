@@ -104,7 +104,6 @@ export default {
     };
 
     try {
-      // --- Execute the action ---
       commandResult = await commandSug.baseDefinition.action(
         commandSug.options,
       ); // Pass ACTION options

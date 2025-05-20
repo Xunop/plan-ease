@@ -1,5 +1,3 @@
-// src/lib/tiptap-extensions/DateNode/DateNode.ts
-
 import { mergeAttributes, Node, InputRule } from "@tiptap/core";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 import { DateComponent } from "./DateComponent"; // React component for NodeView

@@ -1,4 +1,3 @@
-// commands.ts
 import { CommandDefinition, CommandResult } from "./types";
 import { preprocessCommand } from "./commandUtils";
 import { AmapWeather, Forecast } from "@/lib/api/gaode/types";

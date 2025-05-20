@@ -1,4 +1,3 @@
-// lib/api/axiosInstance.ts
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axiosRetry from 'axios-retry';
 

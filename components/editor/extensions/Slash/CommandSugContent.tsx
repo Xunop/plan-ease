@@ -1,4 +1,3 @@
-// CommandSugContent.tsx (Conceptual Changes)
 import React, {
   useEffect,
   useImperativeHandle,
@@ -44,7 +43,7 @@ export const CommandSugContent = forwardRef<CmdSugRef, CommandSugContentProps>(
     const [side, setSide] = useState<"top" | "bottom">("bottom");
     const popoverRef = useRef<HTMLDivElement>(null);
 
-    const [dynamicWidth, setDynamicWidth] = useState<string>("auto"); // Start with 'auto' or a fallback width like '170px'
+    const [dynamicWidth, setDynamicWidth] = useState<string>("auto");
     // Callback to Calculate and Set Width
     const updateWidth = useCallback(() => {
       if (props.editor?.view?.dom) {
@@ -64,7 +63,6 @@ export const CommandSugContent = forwardRef<CmdSugRef, CommandSugContentProps>(
       }
     }, [props.editor]);
 
-    // --- Effect to Calculate Width When Opening ---
     useEffect(() => {
       if (open) {
         updateWidth(); // Calculate width when popover opens
@@ -166,13 +164,12 @@ export const CommandSugContent = forwardRef<CmdSugRef, CommandSugContentProps>(
       },
     }));
 
-    // Selection logic
     const selectItem = (index: number) => {
       const selected = suggestionItems[index];
       if (selected) {
         props.command({ commandSug: selected }); // Pass command name back
       }
-      console.log("end");
+      // console.log("end");
     };
 
     const handleOpenAutoFocus = () => {
