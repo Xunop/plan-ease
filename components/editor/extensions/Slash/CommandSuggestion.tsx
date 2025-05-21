@@ -9,24 +9,25 @@ import { throttle } from "lodash";
 import { processCommandQuery } from "./queryProcessor";
 import { initialSuggestions, updateInitialSuggestions } from "./suggestions";
 import { FormulasAttributes } from "../Formulas/types";
+import { debounceAsyncSharedPromise } from "@/lib/utils/input";
 
 type SuggestionProps = {
   editor: Editor;
   query: string;
 };
 
-const throttleFetchSlash = throttle(
-  async ({ query, editor }: SuggestionProps): Promise<CommandSuggestion[]> => {
-    const inputText = "/" + query;
-    const suggestionState: QueryState = processCommandQuery(
-      inputText,
-      initialSuggestions,
-    );
+const handleCMDTips = async ({
+  query,
+  editor,
+}: SuggestionProps): Promise<CommandSuggestion[]> => {
+  const inputText = "/" + query;
+  const suggestionState: QueryState = processCommandQuery(
+    inputText,
+    initialSuggestions,
+  );
 
-    return suggestionState.suggestions.slice(0, 10);
-  },
-  300,
-);
+  return suggestionState.suggestions.slice(0, 10);
+};
 
 const SlashPluginKey = new PluginKey("slash");
 
@@ -42,7 +43,8 @@ export default {
     query,
     editor,
   }: SuggestionProps): Promise<CommandSuggestion[]> => {
-    return throttleFetchSlash({ query, editor });
+    const debouncedFetchSlash = debounceAsyncSharedPromise(handleCMDTips, 300);
+    return debouncedFetchSlash({ query, editor });
   },
 
   render: () => {

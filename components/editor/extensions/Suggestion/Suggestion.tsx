@@ -2,51 +2,50 @@
 
 import { Editor, Range } from "@tiptap/core";
 import { ReactRenderer } from "@tiptap/react";
-import SuggestionContent, { SuggestionContentRef } from "./SuggestionContent";
+import { SuggestionContent, SuggestionContentRef } from "./SuggestionContent";
 import { fetchAmapTips } from "@/lib/api/gaode/search";
-import throttle from "lodash.throttle";
 import { AmapTip } from "@/lib/api/gaode/types";
+// import { debounce, throttle } from "lodash";
+import { debounce, throttle } from "radash";
+import { debounceAsyncSharedPromise } from "@/lib/utils/input";
 
 // Define the types for the props and the structure of the component.
 interface MentionProps {
   query: string;
 }
 
-const throttledFetchAmapTips = throttle(
-  async (query: string): Promise<AmapTip[]> => {
-    const trimmedQuery = query.trim();
+const handleAmapTips = async (query: string): Promise<AmapTip[]> => {
+  const trimmedQuery = query.trim();
 
-    // If the query is empty or contains only spaces, return an empty array
-    if (!trimmedQuery) {
-      console.warn("Empty or invalid query");
-      return [];
-    }
+  // If the query is empty or contains only spaces, return an empty array
+  if (!trimmedQuery) {
+    console.warn("Empty or invalid query");
+    return [];
+  }
 
-    try {
-      const tips = await fetchAmapTips(trimmedQuery);
-      console.log("tips: ", tips)
-      // const names = tips.map((tip) => tip.name);
-      // const tips = response.tips.map((tip) => tip.name);
-      return tips;
-    } catch (error) {
-      console.log("Error fetching tips: ", error);
-      return [];
-    }
-  },
-  1000,
-);
+  try {
+    // console.log("tips res: ", tips);
+    // const names = tips.map((tip) => tip.name);
+    // const tips = response.tips.map((tip) => tip.name);
+    return fetchAmapTips(trimmedQuery);
+  } catch (error) {
+    console.log("Error fetching tips: ", error);
+    return [];
+  }
+};
 
 // About suggestion implement, see https://github.com/ueberdosis/tiptap/blob/develop/packages/suggestion/src/suggestion.ts
 export default {
   items: async ({ query }: MentionProps): Promise<AmapTip[]> => {
-    return throttledFetchAmapTips(query);
+    const debouncedFetchAmapTips = debounceAsyncSharedPromise(handleAmapTips, 300);
+    const tips = debouncedFetchAmapTips(query);
+    return tips;
   },
 
   render: () => {
     let component: ReactRenderer;
     return {
       onStart: (props: any) => {
-        // console.log("Suggestion start", props);
         component = new ReactRenderer(SuggestionContent, {
           props,
           editor: props.editor,

@@ -47,7 +47,7 @@ export function setupMarkerPopup(
         if (contentNode._reactRoot) {
           contentNode._reactRoot.unmount();
         }
-        console.log("marker", currentMarker)
+        // console.log("marker", currentMarker)
         const root = createRoot(contentNode);
         root.render(
           <React.StrictMode>

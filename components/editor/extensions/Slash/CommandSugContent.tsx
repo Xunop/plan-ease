@@ -27,7 +27,6 @@ interface CommandSugContentProps {
   command: (args: { commandSug: CommandSuggestion }) => void; // Pass command name on selection
 }
 
-// Inside the component:
 export const CommandSugContent = forwardRef<CmdSugRef, CommandSugContentProps>(
   (props, ref) => {
     const suggestionItems = props.items;
