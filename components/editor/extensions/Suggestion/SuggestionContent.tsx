@@ -8,7 +8,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import localForage from "localforage";
-import React, { useEffect, useImperativeHandle, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { forwardRef } from "react";
 import { Editor } from "@tiptap/core";
 import "./List.scss";
@@ -21,6 +27,7 @@ import {
 import { useBoundStore } from "@/providers/location-store-provider";
 import localforage from "localforage";
 import { generateFixedLengthId } from "@/lib/utils/index";
+import { throttle } from "lodash";
 
 interface SuggestionContentProps {
   items: AmapTip[];
@@ -35,13 +42,41 @@ export interface SuggestionContentRef {
   handleKeydown: ({ event }: { event: KeyboardEvent }) => boolean;
 }
 
-const SuggestionContent = forwardRef<
+export const SuggestionContent = forwardRef<
   SuggestionContentRef,
   SuggestionContentProps
 >((props, ref) => {
   const [open, setOpen] = useState<boolean>(false);
 
+  const [dynamicWidth, setDynamicWidth] = useState<string>("auto");
+
+  // Callback to Calculate and Set Width
+  const updateWidth = useCallback(() => {
+    if (props.editor?.view?.dom) {
+      const editorWidth = props.editor.view.dom.clientWidth;
+
+      // 60% of editor width
+      const fraction = 3 / 5;
+
+      let desiredWidth = editorWidth * fraction;
+
+      // Apply a minimum width
+      desiredWidth = Math.max(150, desiredWidth);
+
+      setDynamicWidth(`${desiredWidth}px`);
+    } else {
+      setDynamicWidth("200px"); // Fallback width if editor isn't available
+    }
+  }, [props.editor]);
+
   useEffect(() => {
+    if (open) {
+      updateWidth(); // Calculate width when popover opens
+    }
+  }, [open, updateWidth]);
+
+  useEffect(() => {
+    if (!open || !props.editor?.view?.dom) return;
     const pos = props.decorationNode?.getBoundingClientRect();
     if (pos) {
       // Estimate the height of the PopoverContent
@@ -51,7 +86,6 @@ const SuggestionContent = forwardRef<
 
       // Margin to ensure some space between Popover and viewport edge
       const margin = 20;
-
       // Check if there's enough space below the anchor
       const spaceBelow = viewportHeight - pos.bottom;
       // console.log(
@@ -71,7 +105,26 @@ const SuggestionContent = forwardRef<
         bottom: pos.bottom,
       });
     }
-  }, [open]);
+
+    const editorElement = props.editor.view.dom;
+
+    // Throttle the update function to avoid excessive calls during resize/drag
+    const throttledUpdateWidth = throttle(updateWidth, 100); // Update max every 100ms
+
+    // Create an observer instance linked to the throttled callback
+    const observer = new ResizeObserver(() => {
+      throttledUpdateWidth();
+    });
+
+    // Start observing the editor element
+    observer.observe(editorElement);
+
+    return () => {
+      observer.unobserve(editorElement);
+      observer.disconnect();
+      throttledUpdateWidth.cancel?.();
+    };
+  }, [open, updateWidth]);
 
   useImperativeHandle(ref, () => ({
     handleShow: () => {
@@ -155,7 +208,7 @@ const SuggestionContent = forwardRef<
     if (item) {
       // Use `location` as id, but formatted as `lng-lat`
       // let uniqueId: string;
-      const uniqueId = generateFixedLengthId(8, "mention-")
+      const uniqueId = generateFixedLengthId(8, "mention-");
       let location: string;
       const placeId = item.id;
       // The id will no return when search a city.
@@ -246,29 +299,9 @@ const SuggestionContent = forwardRef<
     // console.log("focus", props.editor.view.hasFocus());
   };
 
-  const handleCloseAutoFocus = () => {
-    console.log("Popover closed, focus will be set to the trigger.");
-    props.editor.commands.focus(props.editor.view.state.selection.$anchor.pos);
-  };
-
   const handleEscapeKeyDown = () => {
     console.log("Escape key pressed, closing Popover.");
     // props.editor.commands.focus(props.editor.view.state.selection.$anchor.pos);
-  };
-
-  const handlePointerDownOutside = (event: any) => {
-    console.log("Clicked outside the Popover, closing it.", event);
-    setOpen(false);
-  };
-
-  const handleFocusOutside = () => {
-    console.log("Focus moved outside the Popover, closing it.");
-    setOpen(false);
-  };
-
-  const handleInteractOutside = () => {
-    console.log("Interaction outside Popover detected, closing it.");
-    setOpen(false);
   };
 
   // FIXME: The side props not affect the direction of the popover
@@ -289,23 +322,21 @@ const SuggestionContent = forwardRef<
       <PopoverContent
         ref={popoverRef}
         onOpenAutoFocus={handleOpenAutoFocus}
-        // onCloseAutoFocus={handleCloseAutoFocus}
         onEscapeKeyDown={handleEscapeKeyDown}
-        // onPointerDownOutside={handlePointerDownOutside}
-        // onFocusOutside={handleFocusOutside}
-        // onInteractOutside={handleInteractOutside}
         style={{
           position: "absolute",
           top: position.bottom,
           left: position.left,
+          width: dynamicWidth,
+          maxWidth: "none",
         }}
         side={side}
         align="start"
         // sideOffset={position.height}
         // sideOffset={10}
-        className="w-fit"
+        className="p-0"
       >
-        <div className="dropdown-menu w-fit">
+        <div className="dropdown-menu">
           {props.items.length ? (
             props.items.map((item, index) => (
               <button
@@ -325,7 +356,3 @@ const SuggestionContent = forwardRef<
     </Popover>
   );
 });
-
-SuggestionContent.displayName = "SuggestionContent";
-
-export default SuggestionContent;
