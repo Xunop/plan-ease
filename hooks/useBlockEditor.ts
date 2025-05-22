@@ -38,7 +38,7 @@ export const useBlockEditor = ({
   const editor = useEditor({
     ...editorOptions,
     // FIXME: In client side, we should set to true, but tiptap will throw ssr error
-    immediatelyRender: false,
+    immediatelyRender: true,
     shouldRerenderOnTransaction: true,
     autofocus: true,
     editorProps: {

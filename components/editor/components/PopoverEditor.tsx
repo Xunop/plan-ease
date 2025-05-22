@@ -34,7 +34,7 @@ export function PopoverEditor({
 
   // Initialize the popover editor
   const popoverEditor = useEditor({
-    immediatelyRender: false,
+    immediatelyRender: true,
     extensions: [
       Paragraph,
       CustomDocument,
