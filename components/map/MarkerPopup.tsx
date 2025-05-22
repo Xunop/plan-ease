@@ -4,7 +4,7 @@ import L from "leaflet";
 import { Editor as CoreTiptapEditor } from "@tiptap/core";
 import { PopoverEditor } from "@/components/editor/components/PopoverEditor";
 import { AmapPlace } from "@/lib/api/gaode/types";
-import "./style.scss"
+import "./style.scss";
 
 // Define a more specific type for the data attached to markers
 export interface CustomMarkerData {
@@ -43,22 +43,31 @@ export function setupMarkerPopup(
     if (currentMarker._customData && popup && mainEditor) {
       const contentNode = popup.getContent() as PopupContentElement | null;
       if (contentNode) {
-        // If a React root already exists (e.g., reopening without full close), unmount first
-        if (contentNode._reactRoot) {
-          contentNode._reactRoot.unmount();
-        }
-        // console.log("marker", currentMarker)
-        const root = createRoot(contentNode);
-        root.render(
-          <React.StrictMode>
-            <PopoverEditor
-              mentionId={currentMarker._customData.id}
-              editor={mainEditor} // Pass the shared CoreTiptapEditor instance
-              place={currentMarker._customData.place}
-            />
-          </React.StrictMode>,
-        );
-        contentNode._reactRoot = root; // Store root for unmounting
+        setTimeout(() => {
+          // Defer execution
+          if (!popup.isOpen() || !document.body.contains(contentNode)) {
+            if (contentNode._reactRoot) {
+              contentNode._reactRoot.unmount();
+              delete contentNode._reactRoot;
+            }
+            return;
+          }
+          if (contentNode._reactRoot) {
+            contentNode._reactRoot.unmount();
+            delete contentNode._reactRoot;
+          }
+          const root = createRoot(contentNode);
+          root.render(
+            <React.StrictMode>
+              <PopoverEditor
+                mentionId={currentMarker._customData!.id}
+                editor={mainEditor}
+                place={currentMarker._customData!.place}
+              />
+            </React.StrictMode>,
+          );
+          contentNode._reactRoot = root;
+        }, 0);
       }
     } else if (popup && !mainEditor) {
       const contentNode = popup.getContent() as HTMLElement | null;
