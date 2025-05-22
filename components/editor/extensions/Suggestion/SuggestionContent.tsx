@@ -221,6 +221,7 @@ export const SuggestionContent = forwardRef<
             // uniqueId = location.split(",")[0] + "-" + location.split(",")[1];
 
             // When selected a place, we need to store it.
+            place.id = uniqueId;
             AddPlace(place);
             localforage.setItem(uniqueId, place).then(() => {
               // command implement see Suggestion.tsx
@@ -244,6 +245,7 @@ export const SuggestionContent = forwardRef<
                   place = places[0];
                   location = place.location;
                   // uniqueId = location.split(",")[0] + "-" + location.split(",")[1];
+                  place.id = uniqueId;
                   AddPlace(place);
                   localforage.setItem(uniqueId, place).then(() => {
                     props.command({
@@ -266,6 +268,7 @@ export const SuggestionContent = forwardRef<
               });
           } else {
             // AddLocation(location);
+            place.id = uniqueId;
             AddPlace(place);
           }
         });
