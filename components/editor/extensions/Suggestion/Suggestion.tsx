@@ -25,8 +25,6 @@ const handleAmapTips = async (query: string): Promise<AmapTip[]> => {
 
   try {
     // console.log("tips res: ", tips);
-    // const names = tips.map((tip) => tip.name);
-    // const tips = response.tips.map((tip) => tip.name);
     return fetchAmapTips(trimmedQuery);
   } catch (error) {
     console.log("Error fetching tips: ", error);
@@ -34,43 +32,99 @@ const handleAmapTips = async (query: string): Promise<AmapTip[]> => {
   }
 };
 
+const debouncedFetchAmapTips = debounceAsyncSharedPromise(handleAmapTips, 300);
+
 // About suggestion implement, see https://github.com/ueberdosis/tiptap/blob/develop/packages/suggestion/src/suggestion.ts
 export default {
-  items: async ({ query }: MentionProps): Promise<AmapTip[]> => {
-    const debouncedFetchAmapTips = debounceAsyncSharedPromise(handleAmapTips, 300);
-    const tips = debouncedFetchAmapTips(query);
-    return tips;
+  items: ({ query }: MentionProps): AmapTip[] => {
+    // Return immediately
+    return [];
   },
 
   render: () => {
     let component: ReactRenderer;
+    // Flag to track if onExit has been processed
+    let exited = false;
     return {
       onStart: (props: any) => {
+        exited = false;
         component = new ReactRenderer(SuggestionContent, {
           props,
           editor: props.editor,
         });
-        const ref = component.ref as SuggestionContentRef;
-        ref.handleShow();
+
+        setTimeout(() => {
+          if (component && component.ref && !exited) {
+            const ref = component.ref as SuggestionContentRef;
+            ref.handleShow();
+          }
+        }, 0);
+
+        if (props.query !== undefined) {
+          debouncedFetchAmapTips(props.query)
+            .then((tips) => {
+              if (component && !exited) {
+                // Once fetched, update the component with the actual items.
+                component.updateProps({ ...props, items: tips });
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching tips in onStart:", error);
+              if (component && !exited) {
+                component.updateProps({ ...props, items: [] });
+              }
+            });
+        }
       },
 
       onUpdate(props: any) {
         // console.log("suggestion update");
-        if (component) {
-          component.updateProps(props);
+
+        if (component && !exited) {
+          if (props.query !== undefined) {
+            debouncedFetchAmapTips(props.query)
+              .then((tips) => {
+                if (component && !exited) {
+                  component.updateProps({ ...props, items: tips });
+                }
+              })
+              .catch((error) => {
+                console.error("Error fetching tips in onUpdate:", error);
+                if (component && !exited) {
+                  component.updateProps({ ...props, items: [] }); // Handle error
+                }
+              });
+          } else {
+            // If query becomes undefined/empty, clear items
+            if (component && !exited) {
+              component.updateProps({ ...props, items: [] });
+            }
+          }
         }
       },
 
       onKeyDown(props: { event: KeyboardEvent }) {
+        if (exited || !component || !component.ref) {
+          return false;
+        }
+
         const ref = component.ref as SuggestionContentRef;
         return ref.handleKeydown(props);
       },
 
       onExit() {
-        const ref = component.ref as SuggestionContentRef;
+        if (!component || exited) {
+          return;
+        }
 
-        ref.handleHide();
-        component?.destroy();
+        exited = true;
+
+        const currentRef = component.ref as SuggestionContentRef;
+
+        if (currentRef) {
+          currentRef.handleHide();
+        }
+        component.destroy();
       },
     };
   },
