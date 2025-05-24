@@ -69,7 +69,7 @@ export default {
               }
             })
             .catch((error) => {
-              console.error("Error fetching tips in onStart:", error);
+              console.error("Error fetching mention tips in onStart:", error);
               if (component && !exited) {
                 component.updateProps({ ...props, items: [] });
               }
@@ -121,9 +121,7 @@ export default {
 
         const currentRef = component.ref as SuggestionContentRef;
 
-        if (currentRef) {
-          currentRef.handleHide();
-        }
+        currentRef?.handleHide();
         component.destroy();
       },
     };

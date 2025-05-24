@@ -5,7 +5,7 @@ import { ReactRenderer } from "@tiptap/react";
 import { CmdSugRef, CommandSugContent } from "./CommandSugContent";
 import { CommandResult, CommandSuggestion, QueryState } from "./types";
 import { PluginKey } from "@tiptap/pm/state";
-import { throttle } from "lodash";
+// import { throttle } from "lodash";
 import { processCommandQuery } from "./queryProcessor";
 import { initialSuggestions, updateInitialSuggestions } from "./suggestions";
 import { FormulasAttributes } from "../Formulas/types";
@@ -16,10 +16,11 @@ type SuggestionProps = {
   query: string;
 };
 
-const handleCMDTips = async ({
-  query,
-  editor,
-}: SuggestionProps): Promise<CommandSuggestion[]> => {
+const handleCMDTips = async (query: string): Promise<CommandSuggestion[]> => {
+  if (query === "") {
+    return initialSuggestions;
+  }
+
   const inputText = "/" + query;
   const suggestionState: QueryState = processCommandQuery(
     inputText,
@@ -31,6 +32,8 @@ const handleCMDTips = async ({
 
 const SlashPluginKey = new PluginKey("slash");
 
+const debouncedFetchSlash = debounceAsyncSharedPromise(handleCMDTips, 300);
+
 // About suggestion implement, see https://github.com/ueberdosis/tiptap/blob/develop/packages/suggestion/src/suggestion.ts
 export default {
   // const slashSuggestionConfig: Omit<SuggestionOptions<SuggestionItem>, 'editor'> = {
@@ -39,44 +42,92 @@ export default {
   // It tells the Tiptap suggestion plugin not to treat a space character as the end of the suggestion query
   allowSpaces: true,
 
-  items: async ({
-    query,
-    editor,
-  }: SuggestionProps): Promise<CommandSuggestion[]> => {
-    const debouncedFetchSlash = debounceAsyncSharedPromise(handleCMDTips, 300);
-    return debouncedFetchSlash({ query, editor });
+  items: async (query: string): Promise<CommandSuggestion[]> => {
+    // Return immediately
+    return initialSuggestions;
   },
 
   render: () => {
     let component: ReactRenderer;
+    // Flag to track if onExit has been processed
+    let exited = false;
     return {
+      onBeforeStart: (props: any) => {
+        updateInitialSuggestions();
+      },
+
       onStart: (props: any) => {
+        exited = false;
         component = new ReactRenderer(CommandSugContent, {
           props,
           editor: props.editor,
         });
-        const ref = component.ref as CmdSugRef;
+        setTimeout(() => {
+          if (component && component.ref && !exited) {
+            const ref = component.ref as CmdSugRef;
+            ref.handleShow();
+          }
+        }, 0);
 
-        updateInitialSuggestions();
-        ref.handleShow();
+        if (props.query !== undefined && props.query !== "") {
+          debouncedFetchSlash(props.query)
+            .then((tips) => {
+              if (component && !exited) {
+                // Once fetched, update the component with the actual items.
+                component.updateProps({ ...props, items: tips });
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching slash tips in onStart:", error);
+              if (component && !exited) {
+                component.updateProps({ ...props, items: initialSuggestions });
+              }
+            });
+        }
       },
 
       onUpdate(props: any) {
         // console.log("suggestion update");
-        if (component) {
-          component.updateProps(props);
+        if (component && !exited) {
+          if (props.query !== undefined && props.query !== "") {
+            debouncedFetchSlash(props.query)
+              .then((tips) => {
+                if (component && !exited) {
+                  // Once fetched, update the component with the actual items.
+                  component.updateProps({ ...props, items: tips });
+                }
+              })
+              .catch((error) => {
+                console.error("Error fetching slash tips in onStart:", error);
+                if (component && !exited) {
+                  component.updateProps({
+                    ...props,
+                    items: initialSuggestions,
+                  });
+                }
+              });
+          }
         }
       },
 
       onKeyDown(props: { event: KeyboardEvent }) {
+        if (exited || !component || !component.ref) {
+          return false;
+        }
+
         const ref = component.ref as CmdSugRef;
         return ref.handleKeydown(props);
       },
 
       onExit() {
+        if (!component || exited) {
+          return;
+        }
+
+        exited = true;
         const ref = component.ref as CmdSugRef;
 
-        ref.handleHide();
+        ref?.handleHide();
         component?.destroy();
       },
     };

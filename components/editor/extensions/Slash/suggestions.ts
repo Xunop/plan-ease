@@ -1,10 +1,6 @@
 import { CommandDefinition, CommandSuggestion } from "./types";
 import { commands as baseCommands } from "./commands"; // Import base definitions
 import { getStore } from "@/providers/location-store-provider";
-import { AmapPlace } from "@/lib/api/gaode/types";
-
-const sampleOrigins = ["London", "Singapore", "Home"];
-const sampleDestinations = ["Paris", "Work", "Airport", "KL"];
 
 // Helper to format a suggestion's display text based on definition and options
 // Prioritizes displayOptions for filling placeholders in the format string.
@@ -71,8 +67,6 @@ export function generateInitialSuggestions(): CommandSuggestion[] {
           const address = loc.location;
           const place= GetPlaceByLoc(address)
 
-          console.log("place: ", place)
-
           const date = d.date;
           if (!place) {
               console.warn("Place is undefined")
@@ -92,23 +86,24 @@ export function generateInitialSuggestions(): CommandSuggestion[] {
           });
         }
       }
-    } else if (commandDef.name === "From") {
-      for (const origin of sampleOrigins) {
-        for (const destination of sampleDestinations) {
-          // Avoid suggesting travel from/to same place if desired
-          if (origin === destination) continue;
-          const options = { origin, destination };
-          suggestions.push({
-            id: `sugg-${suggestionIdCounter++}`,
-            baseCommandName: commandDef.name,
-            commandPrefix: commandDef.commandPrefix,
-            options: options,
-            displayText: formatDisplayText(commandDef, options),
-            baseDefinition: commandDef,
-          });
-        }
-      }
     }
+    // else if (commandDef.name === "From") {
+    //   for (const origin of sampleOrigins) {
+    //     for (const destination of sampleDestinations) {
+    //       // Avoid suggesting travel from/to same place if desired
+    //       if (origin === destination) continue;
+    //       const options = { origin, destination };
+    //       suggestions.push({
+    //         id: `sugg-${suggestionIdCounter++}`,
+    //         baseCommandName: commandDef.name,
+    //         commandPrefix: commandDef.commandPrefix,
+    //         options: options,
+    //         displayText: formatDisplayText(commandDef, options),
+    //         baseDefinition: commandDef,
+    //       });
+    //     }
+    //   }
+    // }
     // Add logic for other command types here
   }
 
@@ -121,14 +116,13 @@ export function generateInitialSuggestions(): CommandSuggestion[] {
  * `initialSuggestions` variable.
  */
 export function updateInitialSuggestions(): void {
-  console.log("Updating initial suggestions...");
+  // console.log("Updating initial suggestions...");
   initialSuggestions = generateInitialSuggestions();
-  console.log(
-    "Initial suggestions updated. New count:",
-    initialSuggestions.length,
-  );
-  // Optional: Log a few examples of the new suggestions
-  console.log("New Suggestions Sample:", initialSuggestions.slice(0, 5));
+  // console.log(
+  //   "Initial suggestions updated. New count:",
+  //   initialSuggestions.length,
+  // );
+  // console.log("New Suggestions Sample:", initialSuggestions.slice(0, 5));
 }
 
 // Generate the list on load (or call this function when needed)
