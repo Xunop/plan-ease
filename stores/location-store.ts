@@ -23,7 +23,7 @@ export type Route = {
   name?: string;
   locations: string[];
   normalColor?: string;
-  highLightColor?: string
+  highLightColor?: string;
 };
 
 export type ButtonPosition = {
@@ -93,6 +93,19 @@ interface CurPLHeightLight {
   ChangePLHeiLien: (id: string, isHeiLight: boolean, color: string) => void;
 }
 
+export interface FocusModeSlice {
+  // ID of the Location object to focus on
+  focusModeTargetLocationId: string | null;
+  // Is the focus mode currently active
+  isFocusModeActive: boolean;
+
+  // Action to set the target location for focus mode
+  setFocusModeTargetLocation: (locationId: string | null) => void;
+
+  // Action to toggle the focus mode on/off (called by the map button)
+  toggleMapFocusMode: () => void;
+}
+
 // interface PLHeightLightSlice {
 //   plHeightLights: PLHeightLight[];
 //   GetPLHeightLight: (id: string) => PLHeightLight | undefined;
@@ -105,6 +118,7 @@ export type Store = LocationSlice &
   DateSlice &
   // PLHeightLightSlice &
   CurPLHeightLight &
+  FocusModeSlice &
   EditorButtonList;
 
 export const defaultInitState = {
@@ -399,7 +413,7 @@ const createCurPLHeightLight: StateCreator<Store, [], [], CurPLHeightLight> = (
       if (exists !== undefined) {
         console.warn("PLHeightLight exists, check to update");
         if (isEqual(newLine, exists)) {
-          console.log("No need to change")
+          console.log("No need to change");
           return {}; // No need to change
         }
       }
@@ -407,6 +421,20 @@ const createCurPLHeightLight: StateCreator<Store, [], [], CurPLHeightLight> = (
       return { curPLHeiLine: newLine };
     });
   },
+});
+
+const createFocusModeSlice: StateCreator<Store, [], [], FocusModeSlice> = (
+  set,
+) => ({
+  focusModeTargetLocationId: null,
+  isFocusModeActive: false,
+  setFocusModeTargetLocation: (locationId) =>
+    set({ focusModeTargetLocationId: locationId }),
+  toggleMapFocusMode: () =>
+    set((state) => ({
+      isFocusModeActive: !state.isFocusModeActive,
+      focusModeTargetLocationId: null,
+    })),
 });
 
 export const createBoundStore = () => {
@@ -417,5 +445,6 @@ export const createBoundStore = () => {
     ...createDateslice(...a),
     ...createPlaceSlice(...a),
     ...createCurPLHeightLight(...a),
+    ...createFocusModeSlice(...a),
   }));
 };

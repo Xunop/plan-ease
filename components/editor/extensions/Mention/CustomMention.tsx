@@ -13,8 +13,14 @@ import {
 import { PopoverEditor } from "@/components/editor/components/PopoverEditor";
 
 function Mention(props: NodeViewProps) {
-  const { places, AddPlace, RemovePlace, AddLocation, RemoveLocation } =
-    useBoundStore((state) => state);
+  const {
+    places,
+    AddPlace,
+    RemovePlace,
+    AddLocation,
+    RemoveLocation,
+    setFocusModeTargetLocation,
+  } = useBoundStore((state) => state);
   const [isOpen, setIsOpen] = useState(false);
   const [place, setPlace] = useState<AmapPlace | null>(null);
   const { id, location, label } = props.node.attrs;
@@ -37,12 +43,20 @@ function Mention(props: NodeViewProps) {
     };
   }, []);
 
+  const handleClick = () => {
+    setIsOpen(true);
+    const id = props.node.attrs.id;
+    if (id !== undefined && id !== "") {
+      setFocusModeTargetLocation(id);
+    }
+  };
+
   return (
     <NodeViewWrapper className="inline w-fit">
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>
           <span
-            onClick={() => setIsOpen(true)}
+            onClick={handleClick}
             className="mention"
             {...props.HTMLAttributes}
             {...props.extension.options.HTMLAttributes}
