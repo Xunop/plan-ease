@@ -23,7 +23,7 @@ const FormulasComponent: React.FC<NodeViewProps> = ({ node, editor }) => {
       const forecast = resultData.forecast;
       const city = displayOptions?.address ?? resultData.city;
       const date = displayOptions?.date ?? forecast.date;
-
+      // forecast.dayweather = "晴"
       // Get visuals for day and night
       const dayVisuals = getWeatherVisuals(forecast.dayweather || "");
       const nightVisuals = getWeatherVisuals(forecast.nightweather || "");

@@ -41,7 +41,7 @@ const MapButtonList: React.FC<MapButtonListProps> = ({
         // disabled={!focusModeTargetLocationId && !isFocusModeActive}
       >
         <Icon
-          name="Locate"
+          name={`${isFocusModeActive ? "LocateFixed" : "Locate"}`}
           className={`transition-all duration-300 ease-in-out group-hover:text-blue-400 ${
             isFocusModeActive ? "text-blue-400" : "text-black"
           }`}

@@ -1,5 +1,5 @@
 .formulas-node {
-  display: inline-block; // Or inline, depending on desired flow
+  display: inline-block;
   border: 1px solid #eee;
   border-radius: 4px;
   padding: 0.1em 0.4em;
@@ -92,7 +92,7 @@
     // Default styles
     color: #666;
 
-    // --- Animations ---
+    // Animations
 
     &--sunny {
       color: #f9d71c; // Amber/Gold
@@ -104,14 +104,12 @@
       animation: drift 8s ease-in-out infinite alternate;
     }
 
-    // ** Adjusted Rain animation **
     &--rainy {
       color: #4a5568; // Darker Gray for cloud
       // Subtle up/down bobbing animation for the whole icon
       animation: bobbing 1.8s ease-in-out infinite;
     }
 
-    // ** Adjusted Snow animation **
     &--snowy {
       color: #e2e8f0; // Light Gray/White for snowflake
       // Gentle rotation + slight bobbing
@@ -173,7 +171,6 @@
   }
 }
 
-// New/Adjusted Keyframes
 @keyframes bobbing {
 
   0%,

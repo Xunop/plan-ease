@@ -48,7 +48,7 @@ export function PopoverEditor({
         field: fieldName,
       }),
     ],
-    autofocus: "end",
+    autofocus: "start",
   });
 
   // Initialize default content if the Yjs field is empty
