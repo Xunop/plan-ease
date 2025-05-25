@@ -218,6 +218,11 @@
     box-decoration-break: clone;
     color: #5c7cfa;
     font-weight: 700;
+
+    :hover {
+      background-color: #bfdbfe;
+    }
+
     // padding: 0.1rem 0.3rem;
 
     &::after {
