@@ -1,3 +1,5 @@
+"use server";
+
 import axiosInstance from "./axiosInstance";
 import { AmapResponse, AmapWeather } from "./types";
 export const fetchAmapWeather = async (

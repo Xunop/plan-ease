@@ -1,3 +1,5 @@
+"use server";
+
 import axiosInstance from "./axiosInstance";
 import { AmapGeocode, AmapPlace, AmapResponse, AmapTip } from "./types";
 

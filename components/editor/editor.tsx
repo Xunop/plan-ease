@@ -1,3 +1,5 @@
+"use client";
+
 // import styles from "./style.module.scss";
 import "./style.scss";
 import { Editor } from "@tiptap/core";

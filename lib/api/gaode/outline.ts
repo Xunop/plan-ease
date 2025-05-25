@@ -1,3 +1,5 @@
+"use server";
+
 import axiosInstance from "./axiosInstance";
 import { AmapPath, AmapResponse, AmapRoute } from "./types";
 

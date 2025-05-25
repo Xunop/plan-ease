@@ -1,4 +1,5 @@
-'use client';
+"use client";
+
 import "./style.scss";
 import BlockEditor from "@/components/editor";
 import {
