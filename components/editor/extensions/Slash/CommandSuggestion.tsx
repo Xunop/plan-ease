@@ -42,7 +42,10 @@ export default {
   // It tells the Tiptap suggestion plugin not to treat a space character as the end of the suggestion query
   allowSpaces: true,
 
-  items: async (query: string): Promise<CommandSuggestion[]> => {
+  items: async ({
+    query: string,
+    editor: Editor,
+  }: SuggestionProps): Promise<CommandSuggestion[]> => {
     // Return immediately
     return initialSuggestions;
   },

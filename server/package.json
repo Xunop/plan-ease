@@ -15,5 +15,8 @@
     "@hocuspocus/server": "^2.15.2",
     "dotenv": "^16.5.0",
     "tsx": "^4.19.4"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.4"
   }
 }
