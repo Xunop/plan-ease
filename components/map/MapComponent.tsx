@@ -119,7 +119,8 @@ const MapComponent: React.FC<MapProps> = ({ mainEditor }) => {
 
       // Fly to the last marker if any markers were added and avoid flyTo
       // if focus mode might take over
-      if (leafletMarkers.length > 0 && !isFocusModeActive && focusModeTargetLocationId !== null) {
+      // if (leafletMarkers.length > 0 && !isFocusModeActive && focusModeTargetLocationId !== null) {
+      if (leafletMarkers.length > 0 && !isFocusModeActive) {
         const lastMarker = leafletMarkers[leafletMarkers.length - 1];
         map.flyTo(lastMarker.getLatLng(), map.getZoom() || 12, {
           duration: 1.5,
