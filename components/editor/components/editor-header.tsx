@@ -1,6 +1,6 @@
 import { Editor } from "@tiptap/core";
 import { useEditorState } from "@tiptap/react";
-import { useCallback } from "react";
+import { ReactNode, useCallback } from "react";
 
 import { Toolbar } from "@/components/ui/toolbar";
 import { Icon } from "@/components/ui/icon";
@@ -13,9 +13,10 @@ export type EditorHeaderProps = {
     editor: Editor;
     collabState: WebSocketStatus;
     users?: EditorUser[];
+    children: ReactNode;
 };
 
-export const EditorHeader = ({ editor, collabState, users }: EditorHeaderProps) => {
+export const EditorHeader = ({ editor, collabState, users, children }: EditorHeaderProps) => {
     const { characters, words } = useEditorState({
         editor,
         selector: (ctx): { characters: number; words: number } => {
@@ -45,6 +46,7 @@ export const EditorHeader = ({ editor, collabState, users }: EditorHeaderProps) 
                     </Toolbar.Button>
                 </div>
             </div>
+            {children}
             <EditorInfo characters={characters} words={words} collabState={collabState} users={users || undefined}/>
         </div>
     );

@@ -111,6 +111,7 @@ const BlockEditor = ({
 
     // const opacity = useFadeOut(buttonListOpen, SetButtonListOpen);
 
+
     const outerDivRef = useRef<HTMLDivElement>(null);
     return editorProps ? (
         <div
@@ -135,7 +136,7 @@ const BlockEditor = ({
                     />
                 </div>
             )}
-            <ContentItemMenu editor={editorProps} isEditable={isEditable} />
+            {/* <ContentItemMenu editor={editorProps} isEditable={isEditable} /> */}
         </div>
     ) : null;
 };

@@ -3,5 +3,36 @@
     background-color: var(--gray-100);
     // padding: 0 10px 10px;
     padding-bottom: 10px;
-    margin: 0 5px 0px;
+    margin: 0 10px 0px;
+}
+
+@keyframes fade-in-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-out-scale {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* Helper classes to apply the animations */
+.animate-in {
+  animation: fade-in-scale 0.4s ease-in-out forwards;
+}
+
+.animate-out {
+  animation: fade-out-scale 0.4s ease-in-out forwards;
 }
