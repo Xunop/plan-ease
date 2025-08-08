@@ -17,7 +17,7 @@ const MapButtonList: React.FC<MapButtonListProps> = ({
     "flex items-center justify-center w-8 h-8 rounded-md cursor-pointer shadow-md transition-all duration-150 ease-in-out focus:outline-none focus:ring-opacity-50 disabled:opacity-60 disabled:cursor-not-allowed";
 
   return (
-    <div className={`space-y-1 absolute top-[4px] left-[4px] z-[1000]`}>
+    <div className={`space-y-1 absolute top-[4px] left-[4px] z-10`}>
       <button
         onClick={onFocusAllMarkersClick}
         className={`group ${buttonBaseClasses} bg-white hover:bg-blue-100 active:bg-blue-200`}

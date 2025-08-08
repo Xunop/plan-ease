@@ -351,6 +351,22 @@ body {
   }
 }
 
+.calculation-result {
+    box-sizing: border-box;
+    color: #08451c;
+    background: #baf7cf;
+    padding: 0 8px;
+    border-radius: 5px;
+    display: inline-block;
+    margin-top: 1px;
+    margin-bottom: 1px;
+    margin-left: 10px;
+    cursor: default;
+    font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    pointer-events: none;
+    user-select: none;
+}
+
 .ProseMirror {
   padding: 0.9rem;
 }

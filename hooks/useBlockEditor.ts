@@ -50,6 +50,22 @@ export const useBlockEditor = ({
       },
     },
 
+    content: `<h1>NumPad Demo with math.js</h1>
+<p>Try editing the calculations!</p>
+<h2>Arithmetic & Units</h2>
+<p>2 * (10kg + 500g) in grams</p>
+<p>5 feet + 10 inches in cm</p>
+<p>200 USD in EUR</p>
+<h2>Variables</h2>
+<p>price = 150 GBP</p>
+<p>vat = 20%</p>
+<p>total = price * (1 + vat)</p>
+<h2>Line References</h2>
+<p>100</p>
+<p>line 12 * 2</p>
+<p>sum(line 12, line 13)</p>
+`,
+
     onCreate: (ctx) => {
       if (provider && !provider.isSynced) {
         provider.on("synced", () => {

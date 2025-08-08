@@ -40,6 +40,7 @@ import DateNode from "./Date/Date";
 import { Slash } from "./Slash/Slash";
 import CommandSuggestion from "./Slash/CommandSuggestion";
 import { FormulasExtension } from "./Formulas/Formulas";
+import { CalculationExtension } from "./Calculation/CalculationExtension";
 
 export const ExtensionKit = ({
   ydoc,
@@ -91,6 +92,8 @@ export const ExtensionKit = ({
       suggestion: Suggestion,
     }),
     FormulasExtension,
+
+    CalculationExtension,
 
     // Heading.configure({
     //   levels: [1, 2, 3],
