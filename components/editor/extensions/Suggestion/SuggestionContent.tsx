@@ -128,6 +128,7 @@ export const SuggestionContent = forwardRef<
 
   useImperativeHandle(ref, () => ({
     handleShow: () => {
+      console.log("show sug")
       setOpen(true);
     },
     handleHide: () => {

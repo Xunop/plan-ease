@@ -174,7 +174,7 @@ const Workspace = ({
     );
 
     // const menuContainerRef = useRef(null);
-    return (
+    return !editor || (
         <div className="relative flex flex-1 flex-col overflow-auto h-full">
             <EditorHeader
                 editor={editor}

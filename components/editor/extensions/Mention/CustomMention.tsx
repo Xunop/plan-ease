@@ -58,8 +58,6 @@ function Mention(props: NodeViewProps) {
           <span
             onClick={handleClick}
             className="mention"
-            {...props.HTMLAttributes}
-            {...props.extension.options.HTMLAttributes}
           >
             @{label}
           </span>
@@ -96,6 +94,7 @@ export const CustomMention = MentionExtension.extend({
     const html = this.options.renderHTML({
       options: mergedOptions,
       node,
+      suggestion: null
     });
 
     if (typeof html === "string") {

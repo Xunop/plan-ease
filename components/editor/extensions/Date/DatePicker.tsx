@@ -15,17 +15,17 @@ interface DatePickerProps {
   // Value from node.attrs.dateValue (yyyy-mm-dd)
   value: string | null;
   // Callback when a date is selected
-  onSelectDate: (date: Date | undefined) => void;
+  selectDateAction: (date: Date | undefined) => void;
   // Manage Popover visibility externally
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  openChangeAction: (open: boolean) => void;
 }
 
 export function DatePickerWrapper({
   value,
-  onSelectDate,
+  selectDateAction,
   open,
-  onOpenChange,
+  openChangeAction,
 }: DatePickerProps) {
   const selectedDate = React.useMemo(
     () => dateStringToDateObject(value),
@@ -33,7 +33,7 @@ export function DatePickerWrapper({
   );
 
   return (
-    <Popover open={open} onOpenChange={onOpenChange}>
+    <Popover open={open} onOpenChange={openChangeAction}>
       <PopoverTrigger asChild>
         {/* Use your preferred trigger - icon button is common */}
         <Button
@@ -49,7 +49,7 @@ export function DatePickerWrapper({
         <Calendar
           mode="single"
           selected={selectedDate}
-          onSelect={onSelectDate} // Pass the callback directly
+          onSelect={selectDateAction} // Pass the callback directly
           initialFocus // Focus calendar when opened
           // Add other react-day-picker props as needed
           // E.g., disabled dates, month navigation limits etc.
