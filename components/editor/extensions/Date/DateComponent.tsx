@@ -287,7 +287,7 @@ export const DateComponent: React.FC<DateNodeViewProps> = ({
     // If focus moves outside, finalize edits
     // Use setTimeout to allow click events (like on Popover trigger) to fire first
     setTimeout(() => {
-      const currentAttrs = editor.state.doc.nodeAt(getPos())?.attrs;
+      const currentAttrs = editor.state.doc.nodeAt(getPos() === undefined ? 0 : getPos() as number)?.attrs;
       if (currentAttrs?.isEditing && !isPickerOpen) {
         finalizeEdits();
       }
@@ -321,9 +321,9 @@ export const DateComponent: React.FC<DateNodeViewProps> = ({
       >
         <DatePickerWrapper
           value={dateValue} // Pass the stored yyyy-mm-dd value
-          onSelectDate={handleDateSelect}
+          selectDateAction={handleDateSelect}
           open={isPickerOpen}
-          onOpenChange={setIsPickerOpen} // Control the picker's open state
+          openChangeAction={setIsPickerOpen} // Control the picker's open state
         />
         <span
           ref={inputRef}
