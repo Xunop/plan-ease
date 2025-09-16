@@ -36,6 +36,7 @@ import CommandSuggestion from "./Slash/CommandSuggestion";
 import { FormulasExtension } from "./Formulas/Formulas";
 import { CalculationExtension } from "./Calculation/CalculationExtension";
 import { BulletList, OrderedList, ListItem, ListKeymap, TaskList, TaskItem } from '@tiptap/extension-list'
+import { EditorUser } from "../types";
 
 export const ExtensionKit = ({
     ydoc,
@@ -45,64 +46,64 @@ export const ExtensionKit = ({
     provider?: HocuspocusProvider | null | undefined;
 }) => {
     const extensions: AnyExtension[] = [
-        // // Must need
+        // Must need
         Document,
         Text,
-        //
-        // CharacterCount,
-        //
-        // // Bold,
-        // // Italic,
-        // // Strike,
-        // // Underline,
-        //
-        // Focus,
-        //
-        // // Node
-        // // ListItem,
-        // // BulletList.extend({
-        // //   addKeyboardShortcuts() {
-        // //     return {
-        // //       Enter: ({ editor }) => {
-        // //         return false;
-        // //       },
-        // //     };
-        // //   },
-        // // }),
-        // OrderedList,
-        // TaskList,
-        // TaskItem.configure({
-        //     nested: true,
+
+        CharacterCount,
+
+        // Bold,
+        // Italic,
+        // Strike,
+        // Underline,
+
+        Focus,
+
+        // Node
+        // ListItem,
+        // BulletList.extend({
+        //   addKeyboardShortcuts() {
+        //     return {
+        //       Enter: ({ editor }) => {
+        //         return false;
+        //       },
+        //     };
+        //   },
         // }),
-        //
-        // // DataRoute,
-        // PlanList,
-        // PlanItem,
-        // DateNode,
-        // Slash.configure({
-        //     suggestion: CommandSuggestion,
-        // }),
-        // // Mention
+        OrderedList,
+        TaskList,
+        TaskItem.configure({
+            nested: true,
+        }),
+
+        // DataRoute,
+        PlanList,
+        PlanItem,
+        DateNode,
+        Slash.configure({
+            suggestion: CommandSuggestion,
+        }),
+        // Mention
         Mention.configure({
             suggestion: Suggestion,
         }),
-        // FormulasExtension,
-        //
-        // CalculationExtension,
-        //
-        // // Heading.configure({
-        // //   levels: [1, 2, 3],
-        // // }),
-        // Blockquote,
-        //
-        // TextAlign.extend({
-        //     addKeyboardShortcuts() {
-        //         return {};
-        //     },
-        // }).configure({
-        //     types: ["heading", "paragraph"],
+        FormulasExtension,
+
+        CalculationExtension,
+
+        // Heading.configure({
+        //   levels: [1, 2, 3],
         // }),
-        //
+        Blockquote,
+
+        TextAlign.extend({
+            addKeyboardShortcuts() {
+                return {};
+            },
+        }).configure({
+            types: ["heading", "paragraph"],
+        }),
+
         StarterKit.configure({
             document: false,
             text: false,
@@ -129,7 +130,7 @@ export const ExtensionKit = ({
                     clientId: provider.awareness?.clientID,
                     name: generateRandomUsername(),
                     color: generateRandomColor(),
-                    ref: React.createRef<HTMLDivElement>(),
+                    // ref: React.createRef<HTMLDivElement>(),
                 },
                 render: (user) => {
                     const cursor = document.createElement("span");

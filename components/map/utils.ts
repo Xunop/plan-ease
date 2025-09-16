@@ -52,7 +52,7 @@ export const getPolylineCoords = (
   allPolylines.push(pathPolylines); // [number, number][] is assignable to LatLngExpression[]
   // });
 
-  console.log("Updated Polylines: ", allPolylines);
+  // console.log("Updated Polylines: ", allPolylines);
   return allPolylines;
 };
 

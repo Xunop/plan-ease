@@ -11,8 +11,8 @@
     "build": "tsx esbuild.config.ts"
   },
   "dependencies": {
-    "@hocuspocus/extension-sqlite": "^2.15.2",
-    "@hocuspocus/server": "^2.15.2",
+    "@hocuspocus/extension-sqlite": "^3.2.3",
+    "@hocuspocus/server": "^3.2.3",
     "dotenv": "^16.5.0",
     "tsx": "^4.19.4"
   },
