@@ -4,7 +4,7 @@ import Workspace from "@/components/workspace";
 import { useCollaboration } from "@/hooks/useCollaboration";
 import { useSearchParams } from "next/navigation";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import {
     Popover,

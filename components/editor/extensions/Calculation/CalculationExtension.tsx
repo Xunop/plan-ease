@@ -26,7 +26,6 @@ export const CalculationExtension = Extension.create({
                     // Initialize state by calculating everything for the first time.
                     init: (_, { doc }) => getFullCalculationState(doc),
                     
-                    // This is the core of the optimization.
                     apply: (tr: Transaction, oldState: CalculationState, oldEditorState: EditorState): CalculationState => {
                         // If the document didn't change, or the change was just selection, do nothing.
                         if (!tr.docChanged) {
@@ -45,12 +44,12 @@ export const CalculationExtension = Extension.create({
                             }
                         });
 
-                        // Now, intelligently update the state instead of rebuilding from scratch.
+                        // Intelligently update the state instead of rebuilding from scratch.
                         return updateCalculationState(tr.doc, oldState, firstDirtyLine);
                     },
                 },
                 props: {
-                    // Decorations are now read directly from our managed state.
+                    // Decorations read directly from our managed state.
                     decorations(state: EditorState) {
                         return this.getState(state)?.decorations;
                     },
@@ -69,7 +68,7 @@ function getFullCalculationState(doc: ProsemirrorNode): CalculationState {
 
 /**
  * It reuses old calculations for lines before `firstDirtyLine`.
- * * @param doc The new Prosemirror document.
+ * @param doc The new Prosemirror document.
  * @param oldState The previous plugin state, containing old decorations and line data.
  * @param firstDirtyLine The first line number (1-indexed) that needs full re-evaluation.
  */
@@ -82,7 +81,7 @@ function updateCalculationState(doc: ProsemirrorNode, oldState: CalculationState
     doc.forEach((node: ProsemirrorNode, pos: number) => {
         if (node.type.name === "paragraph") {
             const expression = node.textContent;
-            
+
             // If we are before the first dirty line and the text hasn't changed, reuse old data.
             if (lineCounter < firstDirtyLine && oldState.lineData[lineCounter - 1]?.text === expression) {
                 const oldData = oldState.lineData[lineCounter - 1];

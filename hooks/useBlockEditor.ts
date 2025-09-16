@@ -89,8 +89,15 @@ export const useBlockEditor = ({
     });
 
     useEffect(() => {
-        provider?.on("status", (event: { status: WebSocketStatus }) => {
-            setCollabState(event.status);
+        // provider?.on("status", (event: { status: WebSocketStatus }) => {
+        //     console.log("event", event)
+        //     setCollabState(event.status);
+        // });
+        provider?.on("connect", () => {
+            setCollabState(WebSocketStatus.Connected)
+        });
+        provider?.on("disconnect", () => {
+            setCollabState(WebSocketStatus.Disconnected)
         });
     }, [provider]);
 
@@ -153,12 +160,15 @@ export const useBlockEditor = ({
     const users = useEditorState({
         editor,
         selector: (ctx): (EditorUser & { initials: string })[] => {
-            if (!ctx.editor?.storage.collaborationCaret?.users) {
+            const userList = ctx.editor?.storage.collaborationCaret?.users;
+
+            if (!userList) {
                 return [];
             }
 
-            return ctx.editor.storage.collaborationCaret.users.map(
-                (user: EditorUser) => {
+            return userList.map(
+                // FIXME: Don't use any
+                (user: any) => {
                     const names = user.name?.split(" ");
                     const firstName = names?.[0];
                     const lastName = names?.[names.length - 1];

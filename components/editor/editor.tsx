@@ -111,7 +111,6 @@ const BlockEditor = ({
 
     // const opacity = useFadeOut(buttonListOpen, SetButtonListOpen);
 
-
     const outerDivRef = useRef<HTMLDivElement>(null);
     return editorProps ? (
         <div
@@ -127,7 +126,7 @@ const BlockEditor = ({
             {buttonListOpen && (
                 <div
                     className="transition-opacity duration-500 ease-in-out"
-                // style={{ opacity: opacity }}
+                    // style={{ opacity: opacity }}
                 >
                     <ButtonList
                         pos={buttonListPos}
