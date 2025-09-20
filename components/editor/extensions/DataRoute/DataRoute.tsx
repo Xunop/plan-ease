@@ -144,15 +144,15 @@ function DataRouteComponent(props: NodeViewProps) {
     return locations;
   };
 
-  useEffect(() => {
-    console.log("DEBUG::routes:", routes);
-  }, [routes]);
+  // useEffect(() => {
+  //   console.log("DEBUG::routes:", routes);
+  // }, [routes]);
 
   useEffect(() => {
     const routeId = props.node.attrs.id;
-    console.log("content: ", items, items.length, routeId);
+    // console.log("content: ", items, items.length, routeId);
     const currentMentionedLocations = getMentionedLocations(items as any[]);
-    console.log("DEBUG::mentions::locations: ", currentMentionedLocations);
+    // console.log("DEBUG::mentions::locations: ", currentMentionedLocations);
     if (currentMentionedLocations.length > 0) {
       const prevMentionedLocations = prevMentionedLocationsRef.current;
 

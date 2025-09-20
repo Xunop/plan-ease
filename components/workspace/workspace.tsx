@@ -116,7 +116,7 @@ const Workspace = ({
                 setIsExitingFullscreen(false); // Reset state for the next time
             }, 200);
         } else {
-            setFullscreenPanelId(panelId); // Instantly set the panel to enter fullscreen
+            setFullscreenPanelId(panelId);
         }
     };
 

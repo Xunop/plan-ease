@@ -5,7 +5,7 @@ import "./style.scss";
 import { Editor } from "@tiptap/core";
 import { EditorContent } from "@tiptap/react";
 
-import { ContentItemMenu } from "@/components/menu/content-item-menu";
+// import { ContentItemMenu } from "@/components/menu/content-item-menu";
 import { Doc as YDoc } from "yjs";
 
 import { HocuspocusProvider } from "@hocuspocus/provider";
