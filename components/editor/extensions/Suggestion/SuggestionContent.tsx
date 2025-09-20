@@ -164,37 +164,6 @@ export const SuggestionContent = forwardRef<
   const [side, setSide] = useState<"top" | "bottom">("bottom");
   const popoverRef = useRef<HTMLDivElement>(null);
 
-  // useEffect(() => {
-  //     const pos = props.decorationNode?.getBoundingClientRect();
-  //     console.log("suggestion pos", pos);
-  //     if (pos) {
-  //         setPosition({
-  //             top: pos.top,
-  //             left: pos.left,
-  //             height: pos.height,
-  //             bottom: pos.bottom,
-  //         });
-  //         // Estimate the height of the PopoverContent
-  //         const popoverHeight =
-  //             popoverRef.current?.getBoundingClientRect().height || 200; // Fallback to 200px if not rendered yet
-  //         const viewportHeight = window.innerHeight;
-  //
-  //         // Margin to ensure some space between Popover and viewport edge
-  //         const margin = 20;
-  //
-  //         // Check if there's enough space below the anchor
-  //         const spaceBelow = viewportHeight - pos.bottom;
-  //         console.log(`popoverHeight: ${popoverHeight}, viewportHeight: ${viewportHeight}, spcae: ${spaceBelow}`)
-  //         if (spaceBelow < popoverHeight + margin) {
-  //             // Not enough space below, show Popover above
-  //             setSide("top");
-  //         } else {
-  //             // Enough space below, show Popover below
-  //             setSide("bottom");
-  //         }
-  //     }
-  // }, [props.decorationNode]);
-
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { AddLocation, places, AddPlace, RemovePlace } = useBoundStore(
     (state) => state,
@@ -311,18 +280,6 @@ export const SuggestionContent = forwardRef<
   // FIXME: The side props not affect the direction of the popover
   return (
     <Popover open={open}>
-      {/* <PopoverAnchor */}
-      {/*     style={{ */}
-      {/*         position: "fixed", */}
-      {/*         top: "100px", */}
-      {/*         left: "200px", */}
-      {/*     }} */}
-      {/* > */}
-      {/*     <div id="123456789">Anchor Here</div> */}
-      {/* </PopoverAnchor> */}
-      {/* <PopoverTrigger> */}
-      {/*     DEBUG-CLICK */}
-      {/* </PopoverTrigger> */}
       <PopoverContent
         ref={popoverRef}
         onOpenAutoFocus={handleOpenAutoFocus}
@@ -344,7 +301,7 @@ export const SuggestionContent = forwardRef<
           {props.items.length ? (
             props.items.map((item, index) => (
               <button
-                className={index === selectedIndex ? "is-selected" : ""}
+                className={index === selectedIndex ? "is-selected item" : "item"}
                 key={index}
                 onClick={() => selectItem(index)}
                 title={item.name || item.address}

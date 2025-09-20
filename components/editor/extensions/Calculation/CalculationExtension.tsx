@@ -25,7 +25,7 @@ export const CalculationExtension = Extension.create({
                 state: {
                     // Initialize state by calculating everything for the first time.
                     init: (_, { doc }) => getFullCalculationState(doc),
-                    
+
                     apply: (tr: Transaction, oldState: CalculationState, oldEditorState: EditorState): CalculationState => {
                         // If the document didn't change, or the change was just selection, do nothing.
                         if (!tr.docChanged) {
@@ -78,7 +78,7 @@ function updateCalculationState(doc: ProsemirrorNode, oldState: CalculationState
     const scope: Record<string, any> = {};
     let lineCounter = 1;
 
-    doc.forEach((node: ProsemirrorNode, pos: number) => {
+    doc.descendants((node: ProsemirrorNode, pos: number) => {
         if (node.type.name === "paragraph") {
             const expression = node.textContent;
 
@@ -135,10 +135,11 @@ function updateCalculationState(doc: ProsemirrorNode, oldState: CalculationState
                 newLineData.push(currentLineData);
             }
         } else {
-           // For non-paragraph nodes, push placeholder data to keep indices aligned.
-           newLineData.push({ text: "" }); 
+            // For non-paragraph nodes, push placeholder data to keep indices aligned.
+            newLineData.push({ text: "" });
         }
         lineCounter++;
+        return true;
     });
 
     return {
@@ -188,7 +189,7 @@ function preprocessForRangeFunctions(expression: string, scope: Record<string, a
             return expression.replace(rangeRegex, `${func}(${argNames.join(',')})`);
         }
     }
-    
+
     // Ignore ordered list items
     const orderedListRegex = /^\d+\.\s+/;
     if (orderedListRegex.test(expression.trimStart())) {
