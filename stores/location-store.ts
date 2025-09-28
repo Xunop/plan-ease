@@ -1,9 +1,9 @@
-import { AmapPlace } from "@/lib/api/gaode/types";
 import { create, StateCreator } from "zustand";
 import Fuse from "fuse.js";
 import { pinyin } from "pinyin-pro";
 import { locationOptions } from "./fuseOptions";
 import { isEqual } from "lodash";
+import { Place } from "@/lib/api/types";
 
 export type Location = {
   id: string;
@@ -57,11 +57,11 @@ interface DateSlice {
 }
 
 interface PlaceSlice {
-  places: AmapPlace[];
-  AddPlace: (place: AmapPlace) => void;
+  places: Place[];
+  AddPlace: (place: Place) => void;
   RemovePlace: (id: string) => void;
-  GetPlaceById: (id: string) => AmapPlace | undefined;
-  GetPlaceByLoc: (loc: string) => AmapPlace | undefined;
+  GetPlaceById: (id: string) => Place | undefined;
+  GetPlaceByLoc: (loc: string) => Place | undefined;
 }
 
 interface RouteSlice {
@@ -123,7 +123,7 @@ export type Store = LocationSlice &
 
 export const defaultInitState = {
   locations: [] as Location[],
-  places: [] as AmapPlace[],
+  places: [] as Place[],
   dates: [] as Date[],
   routes: [] as Route[],
   buttonListOpen: false,
@@ -256,7 +256,7 @@ const createPlaceSlice: StateCreator<Store, [], [], PlaceSlice> = (
   get,
 ) => ({
   places: defaultInitState.places,
-  AddPlace: (place: AmapPlace) =>
+  AddPlace: (place: Place) =>
     set((state) => ({
       places: [...state.places, place],
     })),
@@ -272,7 +272,7 @@ const createPlaceSlice: StateCreator<Store, [], [], PlaceSlice> = (
         locations: route.locations.filter((locId) => locId !== id),
       })),
     })),
-  GetPlaceById: (id: string): AmapPlace | undefined => {
+  GetPlaceById: (id: string): Place | undefined => {
     const state = get();
 
     return state.places.find((place) => {
@@ -281,7 +281,7 @@ const createPlaceSlice: StateCreator<Store, [], [], PlaceSlice> = (
       return id === placeId;
     });
   },
-  GetPlaceByLoc: (loc: string): AmapPlace | undefined => {
+  GetPlaceByLoc: (loc: string): Place | undefined => {
     const state = get();
 
     return state.places.find((place) => {

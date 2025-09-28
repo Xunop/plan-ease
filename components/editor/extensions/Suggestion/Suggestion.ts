@@ -10,6 +10,8 @@ import { AmapTip } from "@/lib/api/gaode/types";
 // import { debounce, throttle } from "radash";
 import { debounceAsyncSharedPromise } from "@/lib/utils/input";
 import MentionList from "./List";
+import { fetchSuggestions } from "@/lib/bridge/search";
+import { Suggestion } from "@/lib/api/types";
 
 // Define the types for the props and the structure of the component.
 interface MentionProps {
@@ -38,7 +40,7 @@ const updatePosition = (editor: Editor, element: HTMLElement) => {
     });
 };
 
-const handleAmapTips = async (query: string): Promise<AmapTip[]> => {
+const handleTips = async (query: string): Promise<Suggestion[]> => {
     const trimmedQuery = query.trim();
 
     // If the query is empty or contains only spaces, return an empty array
@@ -49,7 +51,8 @@ const handleAmapTips = async (query: string): Promise<AmapTip[]> => {
 
     try {
         // console.log("tips res: ", tips);
-        return fetchAmapTips(trimmedQuery);
+        // return fetchAmapTips(trimmedQuery);
+        return fetchSuggestions(trimmedQuery)
         // return [];
     } catch (error) {
         console.error("Error fetching tips: ", error);
@@ -57,11 +60,11 @@ const handleAmapTips = async (query: string): Promise<AmapTip[]> => {
     }
 };
 
-const debouncedFetchAmapTips = debounceAsyncSharedPromise(handleAmapTips, 300);
+const debouncedFetchTips = debounceAsyncSharedPromise(handleTips, 300);
 
 // About suggestion implement, see https://github.com/ueberdosis/tiptap/blob/develop/packages/suggestion/src/suggestion.ts
 export default {
-    items: ({ query }: MentionProps): AmapTip[] => {
+    items: ({ query }: MentionProps): Suggestion[] => {
         // Return immediately
         return [];
     },
@@ -112,7 +115,7 @@ export default {
 
                 if (component) {
                     if (props.query !== undefined) {
-                        debouncedFetchAmapTips(props.query)
+                        debouncedFetchTips(props.query)
                             .then((tips) => {
                                 if (component) {
                                     component.updateProps({
