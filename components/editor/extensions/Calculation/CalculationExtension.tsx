@@ -91,7 +91,7 @@ function updateCalculationState(doc: ProsemirrorNode, oldState: CalculationState
                 if (oldData.rawValue !== undefined) {
                     scope[`_line${lineCounter}`] = oldData.rawValue;
                     // This part is crucial: re-apply variable assignments to the scope.
-                    const assignmentMatch = expression.match(/^([a-zA-Z\s"][a-zA-Z0-9\s"]*\s*)=/);
+                    const assignmentMatch = expression.match(/^([\u4e00-\u9fa5a-zA-Z0-9\s_]+)\s*=\s*/);
                     if (assignmentMatch) {
                         const variableName = assignmentMatch[1].trim();
                         scope[variableName] = oldData.rawValue;

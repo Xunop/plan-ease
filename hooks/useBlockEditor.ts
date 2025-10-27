@@ -70,10 +70,18 @@ export const useBlockEditor = ({
     <p>price = 150 GBP</p>
     <p>vat = 20%</p>
     <p>total = price * (1 + vat)</p>
+    <h2>中文变量 (Chinese Variables)</h2>
+    <p>价格 = 200 CNY</p>
+    <p>数量 = 5</p>
+    <p>折扣 = 0.8</p>
+    <p>总计 = 价格 * 数量</p>
+    <p>最终价格 = 总计 * 折扣</p>
+    <p>价格1 = 150</p>
+    <p>月度收入 = (价格 + 价格1) * 30</p>
     <h2>Line References</h2>
     <p>100</p>
-    <p>line 12 * 2</p>
-    <p>sum(line 12, line 13)</p>
+    <p>line 16 * 2</p>
+    <p>sum(line 16, line 17)</p>
     `,
 
         onCreate: (ctx) => {
